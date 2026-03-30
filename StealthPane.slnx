@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/StealthPane.Terminal/StealthPane.Terminal.csproj" />
+  <Project Path="src/StealthPane/StealthPane.csproj" />
+</Solution>

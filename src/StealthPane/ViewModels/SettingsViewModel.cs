@@ -1,0 +1,113 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using StealthPane.Models;
+using StealthPane.Services;
+
+namespace StealthPane.ViewModels;
+
+public sealed partial class SettingsViewModel(CliProviderRegistry providerRegistry) : ViewModelBase
+{
+    private AppSettings settings = SettingsService.Load();
+    private Timer? saveTimer;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
+
+    [ObservableProperty]
+    public partial int SelectedProviderIndex { get; set; }
+
+    [ObservableProperty]
+    public partial double Opacity { get; set; } = 1.0;
+
+    [ObservableProperty]
+    public partial string OpacityValueText { get; set; } = "100%";
+
+    [ObservableProperty]
+    public partial int SelectedCaptureModeIndex { get; set; }
+
+    [ObservableProperty]
+    public partial string Hotkey { get; set; } = "Ctrl+Shift+C";
+
+    [ObservableProperty]
+    public partial string SystemPrompt { get; set; } = "";
+
+    [ObservableProperty]
+    public partial decimal CleanupMinutes { get; set; } = 30;
+
+    public event Action? ProviderSelectionChanged;
+    public event Action<double>? OpacityUpdated;
+
+    partial void OnSelectedProviderIndexChanged(int value)
+    {
+        ProviderSelectionChanged?.Invoke();
+    }
+
+    partial void OnOpacityChanged(double value)
+    {
+        settings.WindowOpacity = value;
+        OpacityValueText = $"{(int)(value * 100)}%";
+        OpacityUpdated?.Invoke(value);
+        ScheduleSave();
+    }
+
+    partial void OnSelectedCaptureModeIndexChanged(int value)
+    {
+        settings.Capture.Mode = (CaptureMode)value;
+        ScheduleSave();
+    }
+
+    partial void OnHotkeyChanged(string value)
+    {
+        settings.Capture.Hotkey = value;
+        ScheduleSave();
+    }
+
+    partial void OnSystemPromptChanged(string value)
+    {
+        settings.Capture.SystemPrompt = value;
+        ScheduleSave();
+    }
+
+    partial void OnCleanupMinutesChanged(decimal value)
+    {
+        settings.Capture.AutoCleanupMinutes = (int)value;
+        ScheduleSave();
+    }
+
+    public void Load(AppSettings settings)
+    {
+        this.settings = settings;
+
+        var providers = providerRegistry.GetAllProviders();
+        ProviderNames = providers.Select(p => p.Name).ToList();
+
+        var index = providers.ToList().FindIndex(p => p.Id == settings.ActiveProviderId);
+        SelectedProviderIndex = index >= 0 ? index : 0;
+
+        Opacity = settings.WindowOpacity;
+        OpacityValueText = $"{(int)(settings.WindowOpacity * 100)}%";
+
+        SelectedCaptureModeIndex = (int)settings.Capture.Mode;
+        Hotkey = settings.Capture.Hotkey;
+        SystemPrompt = settings.Capture.SystemPrompt;
+        CleanupMinutes = settings.Capture.AutoCleanupMinutes;
+    }
+
+    [RelayCommand]
+    private void ResetPrompt()
+    {
+        var provider = providerRegistry.GetActiveProvider();
+        SystemPrompt = provider.DefaultSystemPrompt;
+    }
+
+    private void ScheduleSave()
+    {
+        saveTimer?.Dispose();
+        saveTimer = new Timer(_ =>
+        {
+            SettingsService.Save(settings);
+            saveTimer?.Dispose();
+            saveTimer = null;
+        }, null, 500, Timeout.Infinite);
+    }
+}

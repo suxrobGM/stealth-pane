@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:StealthPane.ViewModels"
+             x:Class="StealthPane.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel"
+             Width="300" Background="#252525">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="16,12" Spacing="16">
+
+      <!-- Header -->
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Text="Settings" FontSize="13"
+                   FontWeight="SemiBold" Foreground="#D4D4D4"
+                   VerticalAlignment="Center" />
+        <Button DockPanel.Dock="Right" Content="&#x00D7;" FontSize="14"
+                Background="Transparent" Foreground="#808080"
+                BorderThickness="0" Width="28" Height="28"
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleSettingsCommand}"
+                HorizontalAlignment="Right" />
+      </DockPanel>
+
+      <!-- General Section -->
+      <StackPanel Spacing="8">
+        <TextBlock Text="GENERAL" FontSize="10" Foreground="#555555"
+                   FontWeight="SemiBold" />
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Provider" FontSize="11" Foreground="#808080" />
+          <ComboBox FontSize="11" Height="28"
+                    Background="#2D2D2D" Foreground="#D4D4D4"
+                    BorderThickness="0"
+                    ItemsSource="{Binding ProviderNames}"
+                    SelectedIndex="{Binding SelectedProviderIndex}" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Left" Text="Opacity" FontSize="11"
+                       Foreground="#808080" VerticalAlignment="Center" />
+            <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#808080"
+                       VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Text="{Binding OpacityValueText}" />
+          </DockPanel>
+          <Slider Minimum="0.1" Maximum="1.0"
+                  TickFrequency="0.05" IsSnapToTickEnabled="True"
+                  Value="{Binding Opacity}" />
+        </StackPanel>
+      </StackPanel>
+
+      <Border Height="1" Background="#333333" />
+
+      <!-- Capture Section -->
+      <StackPanel Spacing="8">
+        <TextBlock Text="CAPTURE" FontSize="10" Foreground="#555555"
+                   FontWeight="SemiBold" />
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Mode" FontSize="11" Foreground="#808080" />
+          <ComboBox FontSize="11" Height="28"
+                    Background="#2D2D2D" Foreground="#D4D4D4"
+                    BorderThickness="0"
+                    SelectedIndex="{Binding SelectedCaptureModeIndex}">
+            <ComboBoxItem Content="Full Screen" />
+            <ComboBoxItem Content="Region" />
+            <ComboBoxItem Content="Window" />
+            <ComboBoxItem Content="Interactive" />
+          </ComboBox>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Hotkey" FontSize="11" Foreground="#808080" />
+          <TextBox FontSize="11" Height="28"
+                   Background="#2D2D2D" Foreground="#D4D4D4"
+                   BorderThickness="0"
+                   Text="{Binding Hotkey}" />
+        </StackPanel>
+      </StackPanel>
+
+      <Border Height="1" Background="#333333" />
+
+      <!-- System Prompt Section -->
+      <StackPanel Spacing="8">
+        <TextBlock Text="SYSTEM PROMPT" FontSize="10" Foreground="#555555"
+                   FontWeight="SemiBold" />
+
+        <TextBox FontSize="11" Height="100"
+                 Background="#2D2D2D" Foreground="#D4D4D4"
+                 BorderThickness="0" AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Text="{Binding SystemPrompt}" />
+
+        <Button Content="Reset to Default" FontSize="11" Height="26"
+                Background="#2D2D2D" Foreground="#808080"
+                BorderThickness="0" HorizontalAlignment="Left"
+                Command="{Binding ResetPromptCommand}" />
+      </StackPanel>
+
+      <Border Height="1" Background="#333333" />
+
+      <!-- Cleanup Section -->
+      <StackPanel Spacing="8">
+        <TextBlock Text="CLEANUP" FontSize="10" Foreground="#555555"
+                   FontWeight="SemiBold" />
+
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="Auto-cleanup after" FontSize="11"
+                     Foreground="#808080" VerticalAlignment="Center" />
+          <NumericUpDown FontSize="11"
+                         Width="70" Height="28" Minimum="5" Maximum="1440"
+                         Increment="5"
+                         Background="#2D2D2D" Foreground="#D4D4D4"
+                         BorderThickness="0"
+                         Value="{Binding CleanupMinutes}" />
+          <TextBlock Text="min" FontSize="11" Foreground="#808080"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

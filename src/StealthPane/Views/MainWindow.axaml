@@ -12,102 +12,96 @@
         ExtendClientAreaTitleBarHeightHint="28"
         Background="#1A1A1A"
         Topmost="{Binding IsAlwaysOnTop}"
-        Opacity="{Binding WindowOpacity}"
         SystemDecorations="Full">
 
-  <Grid>
-    <!-- Main content -->
-    <Grid RowDefinitions="28,*,20">
+  <Grid RowDefinitions="28,*,20" ColumnDefinitions="*,Auto">
 
-      <!-- Title Bar (acts as drag region) -->
-      <Border Grid.Row="0" Background="#1E1E1E">
-        <DockPanel Margin="0">
+    <!-- Title Bar (acts as drag region) -->
+    <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#1E1E1E">
+      <DockPanel Margin="0">
 
-          <!-- Right: Window controls (not draggable) -->
-          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0"
-                      Spacing="0">
-            <Button Content="&#x2299;"
-                    Width="36" Height="28" FontSize="14"
-                    Background="Transparent" Foreground="{Binding PinForeground}"
-                    BorderThickness="0" CornerRadius="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Click="OnPinClick" ToolTip.Tip="Toggle always on top" />
-            <Button Content="&#x2261;"
-                    Width="36" Height="28" FontSize="16"
-                    Background="Transparent" Foreground="#808080"
-                    BorderThickness="0" CornerRadius="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Click="OnSettingsClick" ToolTip.Tip="Settings" />
-            <Button Content="&#x2500;"
-                    Width="36" Height="28" FontSize="11"
-                    Background="Transparent" Foreground="#808080"
-                    BorderThickness="0" CornerRadius="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Click="OnMinimizeClick" />
-            <Button Content="&#x25A1;"
-                    Width="36" Height="28" FontSize="11"
-                    Background="Transparent" Foreground="#808080"
-                    BorderThickness="0" CornerRadius="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Click="OnMaximizeClick" />
-            <Button Content="&#x00D7;"
-                    Width="36" Height="28" FontSize="14"
-                    Background="Transparent" Foreground="#808080"
-                    BorderThickness="0" CornerRadius="0"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Click="OnCloseClick" />
+        <!-- Right: Window controls (not draggable) -->
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0"
+                    Spacing="0">
+          <Button Content="&#x2299;"
+                  Width="36" Height="28" FontSize="14"
+                  Background="Transparent" Foreground="{Binding PinForeground}"
+                  BorderThickness="0" CornerRadius="0"
+                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                  Command="{Binding TogglePinCommand}" ToolTip.Tip="Toggle always on top" />
+          <Button Content="&#x2261;"
+                  Width="36" Height="28" FontSize="16"
+                  Background="Transparent" Foreground="#808080"
+                  BorderThickness="0" CornerRadius="0"
+                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                  Command="{Binding ToggleSettingsCommand}" ToolTip.Tip="Settings" />
+          <Button Content="&#x2500;"
+                  Width="36" Height="28" FontSize="11"
+                  Background="Transparent" Foreground="#808080"
+                  BorderThickness="0" CornerRadius="0"
+                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                  Click="OnMinimizeClick" />
+          <Button Content="&#x25A1;"
+                  Width="36" Height="28" FontSize="11"
+                  Background="Transparent" Foreground="#808080"
+                  BorderThickness="0" CornerRadius="0"
+                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                  Click="OnMaximizeClick" />
+          <Button Content="&#x00D7;"
+                  Width="36" Height="28" FontSize="14"
+                  Background="Transparent" Foreground="#808080"
+                  BorderThickness="0" CornerRadius="0"
+                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                  Click="OnCloseClick" />
+        </StackPanel>
+
+        <!-- Left: App identity + Provider + Status -->
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,0,0,0"
+                    VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <Ellipse Width="8" Height="8" Fill="#10B981" />
+            <TextBlock Text="STEALTHPANE" FontSize="11" FontWeight="Bold"
+                       Foreground="#999999" VerticalAlignment="Center" />
           </StackPanel>
 
-          <!-- Left: App identity + Provider + Status -->
-          <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,0,0,0"
-                      VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-              <Ellipse Width="8" Height="8" Fill="#10B981" />
-              <TextBlock Text="STEALTHPANE" FontSize="11" FontWeight="Bold"
-                         Foreground="#999999" VerticalAlignment="Center" />
-            </StackPanel>
+          <ComboBox FontSize="11" Height="22" MinWidth="100"
+                    Background="Transparent" Foreground="#999999"
+                    BorderThickness="0"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding ProviderNames}"
+                    SelectedIndex="{Binding SelectedProviderIndex}" />
 
-            <ComboBox FontSize="11" Height="22" MinWidth="100"
-                      Background="Transparent" Foreground="#999999"
-                      BorderThickness="0"
-                      VerticalAlignment="Center"
-                      ItemsSource="{Binding ProviderNames}"
-                      SelectedIndex="{Binding SelectedProviderIndex}" />
-
-            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-              <Ellipse Width="5" Height="5" Fill="#10B981" Opacity="0.6" />
-              <TextBlock Text="PROTECTED" FontSize="10" Foreground="#10B981"
-                         Opacity="0.6" VerticalAlignment="Center" />
-            </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <Ellipse Width="5" Height="5" Fill="#10B981" Opacity="0.6" />
+            <TextBlock Text="PROTECTED" FontSize="10" Foreground="#10B981"
+                       Opacity="0.6" VerticalAlignment="Center" />
           </StackPanel>
+        </StackPanel>
 
-        </DockPanel>
-      </Border>
-
-      <!-- Terminal -->
-      <controls:TerminalWebView Grid.Row="1" x:Name="Terminal" />
-
-      <!-- Info Bar -->
-      <Border Grid.Row="2" Background="#1A1A1A">
-        <DockPanel Margin="12,0">
-          <TextBlock DockPanel.Dock="Left" FontSize="10" Foreground="#555555"
-                     VerticalAlignment="Center">
-            <Run Text="&#x2328;" /><Run Text=" Ctrl+Shift+C" />
-          </TextBlock>
-          <TextBlock DockPanel.Dock="Right" FontSize="10"
-                     Foreground="#555555" VerticalAlignment="Center"
-                     HorizontalAlignment="Right"
-                     Text="{Binding OpacityText}" />
-        </DockPanel>
-      </Border>
-
-    </Grid>
-
-    <!-- Settings Flyout -->
-    <Border IsVisible="{Binding IsSettingsVisible}"
-            HorizontalAlignment="Right" VerticalAlignment="Stretch"
-            Margin="0,28,0,20">
-      <ContentControl Content="{Binding SettingsContent}" />
+      </DockPanel>
     </Border>
+
+    <!-- Terminal -->
+    <controls:TerminalWebView Grid.Row="1" Grid.Column="0" x:Name="Terminal" />
+
+    <!-- Settings Panel (beside terminal, not overlaid) -->
+    <ContentControl Grid.Row="1" Grid.Column="1"
+                    IsVisible="{Binding IsSettingsVisible}"
+                    Content="{Binding SettingsContent}" />
+
+    <!-- Info Bar -->
+    <Border Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0" Background="#1A1A1A">
+      <DockPanel Margin="12,0">
+        <TextBlock DockPanel.Dock="Left" FontSize="10" Foreground="#555555"
+                   VerticalAlignment="Center">
+          <Run Text="&#x2328;" /><Run Text=" Ctrl+Shift+C" />
+        </TextBlock>
+        <TextBlock DockPanel.Dock="Right" FontSize="10"
+                   Foreground="#555555" VerticalAlignment="Center"
+                   HorizontalAlignment="Right"
+                   Text="{Binding OpacityText}" />
+      </DockPanel>
+    </Border>
+
   </Grid>
 </Window>

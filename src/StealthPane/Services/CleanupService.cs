@@ -21,7 +21,10 @@ public sealed class CleanupService : IDisposable
 
     private void Cleanup(object? state)
     {
-        if (!Directory.Exists(tempDirectory)) return;
+        if (!Directory.Exists(tempDirectory))
+        {
+            return;
+        }
 
         var cutoff = DateTime.UtcNow.AddMinutes(-cleanupMinutes);
 

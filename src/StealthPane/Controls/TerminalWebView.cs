@@ -146,6 +146,8 @@ public sealed class TerminalWebView : UserControl, IDisposable
         {
             webView.NavigationCompleted -= OnNavigationCompleted;
             webView.WebMessageReceived -= OnWebMessageReceived;
+            Content = null;
+            webView = null;
         }
     }
 }

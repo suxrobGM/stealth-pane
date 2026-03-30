@@ -1,77 +1,65 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
-using StealthPane.Models;
+using StealthPane.Messages;
 using StealthPane.Services;
 using StealthPane.ViewModels;
 
 namespace StealthPane;
 
-public partial class MainWindow : Window
+public sealed partial class MainWindow : Window,
+    IRecipient<SwitchTerminalMessage>,
+    IRecipient<ApplyOpacityMessage>
 {
     private readonly MainWindowViewModel viewModel;
-    private readonly SettingsViewModel settingsViewModel;
 
     public MainWindow()
     {
         viewModel = App.Services.GetRequiredService<MainWindowViewModel>();
-        settingsViewModel = App.Services.GetRequiredService<SettingsViewModel>();
-
         DataContext = viewModel;
 
         InitializeComponent();
 
         Opened += OnWindowOpened;
         Closing += OnWindowClosing;
-
-        viewModel.ProviderSwitchRequested += OnProviderSwitch;
-        settingsViewModel.OpacityUpdated += opacity => viewModel.WindowOpacity = opacity;
-        settingsViewModel.ProviderSelectionChanged += OnSettingsProviderChanged;
     }
 
     private void OnWindowOpened(object? sender, EventArgs e)
     {
+#if !DEBUG
         ContentProtectionService.EnableProtection(this);
+#endif
+
+        WeakReferenceMessenger.Default.Register<SwitchTerminalMessage>(this);
+        WeakReferenceMessenger.Default.Register<ApplyOpacityMessage>(this);
 
         Terminal.Initialize(viewModel.PtyService);
 
         var provider = viewModel.GetActiveProvider();
         Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
 
-        var cleanup = App.Services.GetRequiredService<CleanupService>();
-        cleanup.Start(viewModel.Settings.Capture.TempDirectory, viewModel.Settings.Capture.AutoCleanupMinutes);
+        viewModel.Initialize();
     }
 
-    private void OnProviderSwitch(CliProviderConfig provider)
+    public void Receive(SwitchTerminalMessage message)
     {
         viewModel.PtyService.Stop();
         Terminal.Reset();
-        Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
+        Terminal.StartProcess(message.Provider.Command, message.Provider.Args, Environment.CurrentDirectory);
     }
 
-    private void OnSettingsProviderChanged()
+    public void Receive(ApplyOpacityMessage message)
     {
-        var providers = viewModel.GetAllProviders();
-        if (settingsViewModel.SelectedProviderIndex >= 0 &&
-            settingsViewModel.SelectedProviderIndex < providers.Count)
+        if (OperatingSystem.IsWindows())
         {
-            viewModel.SelectedProviderIndex = settingsViewModel.SelectedProviderIndex;
+            WindowOpacityHelper.Apply(this, message.Opacity);
         }
-    }
-
-    private void OnPinClick(object? sender, RoutedEventArgs e) => viewModel.TogglePinCommand.Execute(null);
-
-    private void OnSettingsClick(object? sender, RoutedEventArgs e)
-    {
-        if (viewModel.IsSettingsVisible)
+        else
         {
-            viewModel.IsSettingsVisible = false;
-            return;
+            Opacity = message.Opacity;
         }
-
-        settingsViewModel.Load(viewModel.Settings);
-        viewModel.IsSettingsVisible = true;
     }
 
     private void OnMinimizeClick(object? sender, RoutedEventArgs e) =>
@@ -84,6 +72,8 @@ public partial class MainWindow : Window
 
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+        viewModel.PtyService.Stop();
         Terminal.Dispose();
         viewModel.PtyService.Dispose();
     }

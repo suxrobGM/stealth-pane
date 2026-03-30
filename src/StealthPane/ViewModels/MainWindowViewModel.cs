@@ -1,15 +1,22 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using StealthPane.Messages;
 using StealthPane.Models;
 using StealthPane.Services;
 using StealthPane.Terminal;
 
 namespace StealthPane.ViewModels;
 
-public sealed partial class MainWindowViewModel : ViewModelBase
+public sealed partial class MainWindowViewModel : ViewModelBase,
+    IRecipient<OpacityChangedMessage>,
+    IRecipient<SettingsProviderChangedMessage>
 {
     private readonly CliProviderRegistry providerRegistry;
+    private readonly SettingsViewModel settingsViewModel;
+    private readonly CleanupService cleanupService;
+    private bool initialized;
 
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
@@ -19,8 +26,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool IsAlwaysOnTop { get; set; }
+
     [ObservableProperty]
     public partial double WindowOpacity { get; set; } = 1.0;
+
     [ObservableProperty]
     public partial bool IsSettingsVisible { get; set; }
 
@@ -33,22 +42,35 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = new SolidColorBrush(Color.Parse("#808080"));
 
-    public MainWindowViewModel(CliProviderRegistry providerRegistry, PtyService ptyService)
+    public MainWindowViewModel(
+        CliProviderRegistry providerRegistry,
+        PtyService ptyService,
+        SettingsViewModel settingsViewModel,
+        CleanupService cleanupService)
     {
         this.providerRegistry = providerRegistry;
+        this.settingsViewModel = settingsViewModel;
+        this.cleanupService = cleanupService;
         PtyService = ptyService;
         Settings = SettingsService.Load();
 
         LoadFromSettings();
+
+        WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
     }
 
     public AppSettings Settings { get; private set; }
     public PtyService PtyService { get; }
 
     public CliProviderConfig GetActiveProvider() => providerRegistry.GetActiveProvider();
-    public IReadOnlyList<CliProviderConfig> GetAllProviders() => providerRegistry.GetAllProviders();
 
-    public event Action<CliProviderConfig>? ProviderSwitchRequested;
+    public void Initialize()
+    {
+        initialized = true;
+        cleanupService.Start(Settings.Capture.TempDirectory, Settings.Capture.AutoCleanupMinutes);
+        WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
+    }
 
     [RelayCommand]
     private void TogglePin()
@@ -59,7 +81,29 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleSettings()
     {
-        IsSettingsVisible = !IsSettingsVisible;
+        if (IsSettingsVisible)
+        {
+            IsSettingsVisible = false;
+            return;
+        }
+
+        settingsViewModel.Load(Settings);
+        SettingsContent = settingsViewModel;
+        IsSettingsVisible = true;
+    }
+
+    public void Receive(OpacityChangedMessage message)
+    {
+        WindowOpacity = message.Opacity;
+    }
+
+    public void Receive(SettingsProviderChangedMessage message)
+    {
+        var providers = providerRegistry.GetAllProviders();
+        if (message.Index >= 0 && message.Index < providers.Count)
+        {
+            SelectedProviderIndex = message.Index;
+        }
     }
 
     partial void OnSelectedProviderIndexChanged(int value)
@@ -73,7 +117,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Settings.ActiveProviderId = provider.Id;
         SettingsService.Save(Settings);
 
-        ProviderSwitchRequested?.Invoke(provider);
+        if (initialized)
+        {
+            WeakReferenceMessenger.Default.Send(new SwitchTerminalMessage(provider));
+        }
     }
 
     partial void OnIsAlwaysOnTopChanged(bool value)
@@ -89,6 +136,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         Settings.WindowOpacity = value;
         OpacityText = $"\u25D0 {(int)(value * 100)}%";
+
+        if (initialized)
+        {
+            WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(value));
+        }
     }
 
     private void LoadFromSettings()

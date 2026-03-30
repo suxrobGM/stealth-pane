@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using StealthPane.Messages;
 using StealthPane.Models;
 using StealthPane.Services;
 
@@ -34,19 +36,16 @@ public sealed partial class SettingsViewModel(CliProviderRegistry providerRegist
     [ObservableProperty]
     public partial decimal CleanupMinutes { get; set; } = 30;
 
-    public event Action? ProviderSelectionChanged;
-    public event Action<double>? OpacityUpdated;
-
     partial void OnSelectedProviderIndexChanged(int value)
     {
-        ProviderSelectionChanged?.Invoke();
+        WeakReferenceMessenger.Default.Send(new SettingsProviderChangedMessage(value));
     }
 
     partial void OnOpacityChanged(double value)
     {
         settings.WindowOpacity = value;
         OpacityValueText = $"{(int)(value * 100)}%";
-        OpacityUpdated?.Invoke(value);
+        WeakReferenceMessenger.Default.Send(new OpacityChangedMessage(value));
         ScheduleSave();
     }
 

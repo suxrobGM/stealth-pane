@@ -19,11 +19,11 @@
     <!-- Main content -->
     <Grid RowDefinitions="28,*,20">
 
-      <!-- Title Bar -->
-      <Border Grid.Row="0" Background="#1E1E1E" IsHitTestVisible="True">
+      <!-- Title Bar (acts as drag region) -->
+      <Border Grid.Row="0" Background="#1E1E1E">
         <DockPanel Margin="0">
 
-          <!-- Right: Window controls -->
+          <!-- Right: Window controls (not draggable) -->
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0"
                       Spacing="0">
             <Button Content="&#x2299;"

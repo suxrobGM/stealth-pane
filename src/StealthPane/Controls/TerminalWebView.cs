@@ -10,7 +10,7 @@ public sealed class TerminalWebView : UserControl, IDisposable
     private NativeWebView? webView;
     private PtyService? ptyService;
     private readonly List<byte> outputBuffer = [];
-    private readonly object bufferLock = new();
+    private readonly Lock bufferLock = new();
     private bool terminalReady;
     private int pendingCols;
     private int pendingRows;
@@ -140,6 +140,12 @@ public sealed class TerminalWebView : UserControl, IDisposable
         {
             ptyService.OutputReceived -= OnPtyOutput;
             ptyService.ProcessExited -= OnPtyProcessExited;
+        }
+
+        if (webView is not null)
+        {
+            webView.NavigationCompleted -= OnNavigationCompleted;
+            webView.WebMessageReceived -= OnWebMessageReceived;
         }
     }
 }

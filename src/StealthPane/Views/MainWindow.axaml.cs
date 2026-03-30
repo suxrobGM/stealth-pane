@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Models;
@@ -66,12 +67,10 @@ public partial class MainWindow : Window
         if (viewModel.IsSettingsVisible)
         {
             viewModel.IsSettingsVisible = false;
-            viewModel.SettingsContent = null;
             return;
         }
 
         settingsViewModel.Load(viewModel.Settings);
-        viewModel.SettingsContent = settingsViewModel;
         viewModel.IsSettingsVisible = true;
     }
 
@@ -87,5 +86,16 @@ public partial class MainWindow : Window
     {
         Terminal.Dispose();
         viewModel.PtyService.Dispose();
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+
+        var pos = e.GetPosition(this);
+        if (pos.Y <= 28 && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            BeginMoveDrag(e);
+        }
     }
 }

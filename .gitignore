@@ -58,3 +58,5 @@ nunit-*.xml
 *.sln.DotSettings*
 
 .claude/settings.local.json
+
+publish/

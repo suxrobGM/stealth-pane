@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace StealthPane.Terminal;
 
 public static class TerminalAssets
@@ -13,7 +11,7 @@ public static class TerminalAssets
             return AssetDir;
         }
 
-        AssetDir = Path.Combine(PlatformHelper.GetBaseDirectory(), "terminal-assets");
+        AssetDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
         Directory.CreateDirectory(AssetDir);
 
         var assembly = typeof(TerminalAssets).Assembly;

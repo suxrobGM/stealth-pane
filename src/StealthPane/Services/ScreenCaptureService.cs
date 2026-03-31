@@ -9,12 +9,10 @@ public static partial class ScreenCaptureService
 {
     public static string Capture(CaptureSettings settings)
     {
-        var tempDir = string.IsNullOrEmpty(settings.TempDirectory)
-            ? PlatformHelper.GetBaseDirectory()
-            : settings.TempDirectory;
+        var capturesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
 
-        Directory.CreateDirectory(tempDir);
-        var filePath = Path.Combine(tempDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
+        Directory.CreateDirectory(capturesDir);
+        var filePath = Path.Combine(capturesDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
 
         CaptureWindows(filePath, settings);
 

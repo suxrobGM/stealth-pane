@@ -4,7 +4,14 @@
       "Bash(mkdir:*)",
       "Bash(ls:*)",
       "Bash(dir:*)",
-      "mcp__plugin_context7_context7__*"
+      "mcp__plugin_context7_context7__*",
+      "WebFetch(domain:deepwiki.com)",
+      "Read(//c/Users/admin/.nuget/packages/microsoft.windows.console.conpty/1.24.260303001/build/**)",
+      "Read(//c/Users/admin/.nuget/packages/quick.ptynet/1.0.4/**)",
+      "Read(//c/Users/admin/.nuget/packages/quick.ptynet.winpty/1.0.2/**)",
+      "Bash(dotnet remove:*)",
+      "Bash(taskkill //F //IM dotnet.exe)",
+      "Bash(taskkill //F //IM StealthPane.exe)"
     ],
     "deny": [],
     "ask": []

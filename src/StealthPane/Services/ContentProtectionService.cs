@@ -13,12 +13,8 @@ public static partial class ContentProtectionService
             return false;
         }
 
-        if (SetWindowDisplayAffinity(handle.Value, WDA_EXCLUDEFROMCAPTURE))
-        {
-            return true;
-        }
-
-        return SetWindowDisplayAffinity(handle.Value, WDA_MONITOR);
+        return SetWindowDisplayAffinity(handle.Value, WDA_EXCLUDEFROMCAPTURE) ||
+               SetWindowDisplayAffinity(handle.Value, WDA_MONITOR);
     }
 
     #region Win32 API

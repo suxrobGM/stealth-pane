@@ -6,8 +6,10 @@ using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
+using StealthPane.Services;
 using StealthPane.Utilities;
 using StealthPane.ViewModels;
+using StealthPane.Views;
 
 namespace StealthPane;
 
@@ -31,6 +33,48 @@ public sealed partial class MainWindow : Window,
         Closing += OnWindowClosing;
     }
 
+    public void Receive(ApplyOpacityMessage message)
+    {
+        WindowOpacityUtils.Apply(this, message.Opacity);
+    }
+
+    public void Receive(FallbackToShellMessage message)
+    {
+        Terminal.StartProcess("cmd.exe", [], Environment.CurrentDirectory);
+    }
+
+    public async void Receive(RequestRegionSelectionMessage message)
+    {
+        var overlay = new RegionSelectionWindow();
+        overlay.Show();
+        var result = await overlay.GetSelectionAsync();
+        if (result.HasValue)
+        {
+            var r = result.Value;
+            WeakReferenceMessenger.Default.Send(new RegionSelectedMessage(r.X, r.Y, r.Width, r.Height));
+        }
+    }
+
+    public async void Receive(RequestWindowSelectionMessage message)
+    {
+        var ownHandle = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        var windows = WindowEnumerationService.GetVisibleWindows(ownHandle);
+        var picker = new WindowPickerWindow(windows);
+        await picker.ShowDialog(this);
+        var result = await picker.GetSelectionAsync();
+        if (result is not null)
+        {
+            WeakReferenceMessenger.Default.Send(new WindowSelectedMessage(result.Handle, result.Title));
+        }
+    }
+
+    public void Receive(SwitchTerminalMessage message)
+    {
+        viewModel.PtyService.Stop();
+        Terminal.Reset();
+        Terminal.StartProcess(message.Provider.Command, message.Provider.Args, Environment.CurrentDirectory);
+    }
+
     private void OnWindowOpened(object? sender, EventArgs e)
     {
 #if !DEBUG
@@ -52,54 +96,19 @@ public sealed partial class MainWindow : Window,
         viewModel.Initialize(hwnd);
     }
 
-    public void Receive(SwitchTerminalMessage message)
+    private void OnMinimizeClick(object? sender, RoutedEventArgs e)
     {
-        viewModel.PtyService.Stop();
-        Terminal.Reset();
-        Terminal.StartProcess(message.Provider.Command, message.Provider.Args, Environment.CurrentDirectory);
-    }
-
-    public void Receive(ApplyOpacityMessage message)
-    {
-        WindowOpacityUtils.Apply(this, message.Opacity);
-    }
-
-    public async void Receive(RequestRegionSelectionMessage message)
-    {
-        var overlay = new Views.RegionSelectionWindow();
-        overlay.Show();
-        var result = await overlay.GetSelectionAsync();
-        if (result.HasValue)
-        {
-            var r = result.Value;
-            WeakReferenceMessenger.Default.Send(new RegionSelectedMessage(r.X, r.Y, r.Width, r.Height));
-        }
-    }
-
-    public async void Receive(RequestWindowSelectionMessage message)
-    {
-        var ownHandle = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
-        var windows = Services.WindowEnumerationService.GetVisibleWindows(ownHandle);
-        var picker = new Views.WindowPickerWindow(windows);
-        await picker.ShowDialog(this);
-        var result = await picker.GetSelectionAsync();
-        if (result is not null)
-        {
-            WeakReferenceMessenger.Default.Send(new WindowSelectedMessage(result.Handle, result.Title));
-        }
-    }
-
-    private void OnMinimizeClick(object? sender, RoutedEventArgs e) =>
         WindowState = WindowState.Minimized;
+    }
 
-    private void OnMaximizeClick(object? sender, RoutedEventArgs e) =>
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-
-    private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
-
-    public void Receive(FallbackToShellMessage message)
+    private void OnMaximizeClick(object? sender, RoutedEventArgs e)
     {
-        Terminal.StartProcess("cmd.exe", [], Environment.CurrentDirectory);
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)

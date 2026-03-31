@@ -9,11 +9,14 @@ dotnet build src/StealthPane/StealthPane.csproj
 dotnet run --project src/StealthPane/StealthPane.csproj
 ```
 
-Publish AOT single executable:
+Publish single executable (via Launcher):
 
-```bash
-dotnet publish -c Release src/StealthPane/StealthPane.csproj
+```powershell
+cd scripts
+.\publish.ps1
 ```
+
+This publishes the main app, GZip-compresses it, embeds it into the Launcher, and produces a single AOT executable at `publish/win-x64/stealthpane_launcher.exe`. The launcher extracts the app on first run.
 
 No test projects exist yet.
 
@@ -22,7 +25,7 @@ No test projects exist yet.
 - **Framework:** .NET 10, Avalonia 11.3, PublishAot, full trim
 - **Platform:** Windows only
 - **Pattern:** MVVM with CommunityToolkit.Mvvm (source generators)
-- **DI:** Microsoft.Extensions.DependencyInjection — stateful services (`PtyService`, `CleanupService`, `HotkeyService`) and ViewModels are registered as singletons. Stateless services (`SettingsService`, `CliProviderRegistry`, `ScreenCaptureService`, `CaptureInjectorService`, `ContentProtectionService`, `WindowEnumerationService`) are static classes.
+- **DI:** Microsoft.Extensions.DependencyInjection — stateful services (`PtyService`, `HotkeyService`) and ViewModels are registered as singletons. Stateless services (`SettingsService`, `CliProviderRegistry`, `ScreenCaptureService`, `CaptureInjectorService`, `ContentProtectionService`, `WindowEnumerationService`) are static classes.
 - **Messaging:** CommunityToolkit.Mvvm `WeakReferenceMessenger` with explicit `Register<T>` (no `RegisterAll` — AOT incompatible)
 - **Terminal:** xterm.js in `NativeWebView` (WebView2), bridged via PTY
 
@@ -41,6 +44,10 @@ src/
     Utilities/              # Window opacity helpers
   StealthPane.Terminal/     # PTY library
     Assets/                 # Embedded xterm.js + terminal.html
+  StealthPane.Launcher/     # Self-extracting launcher (AOT single exe)
+    Embedded/               # GZip-compressed main app files (populated by publish script)
+scripts/
+  publish.ps1               # Build + package pipeline
 ```
 
 ## PTY Implementation

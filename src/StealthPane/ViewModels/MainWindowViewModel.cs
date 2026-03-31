@@ -122,7 +122,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         hwnd = windowHandle;
         initialized = true;
         PtyService.ProcessExited += OnProcessExited;
-        CleanupService.CleanupOldCaptures(Settings.Capture.TempDirectory);
+        CleanupService.CleanupOldCaptures();
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
         RegisterGlobalHotkeys();
     }

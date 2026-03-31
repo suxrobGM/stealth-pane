@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StealthPane.Models;
-using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
@@ -11,8 +10,7 @@ internal sealed partial class AppSettingsJsonContext : JsonSerializerContext;
 
 public static class SettingsService
 {
-    private static readonly string SettingsDir = PlatformHelper.GetBaseDirectory();
-    private static readonly string SettingsPath = Path.Combine(SettingsDir, "settings.json");
+    private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
 
     public static AppSettings Load()
     {
@@ -35,11 +33,9 @@ public static class SettingsService
 
     public static void Save(AppSettings settings)
     {
-        Directory.CreateDirectory(SettingsDir);
-
         var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
         var tempPath = SettingsPath + ".tmp";
         File.WriteAllText(tempPath, json);
-        File.Move(tempPath, SettingsPath, overwrite: true);
+        File.Move(tempPath, SettingsPath, true);
     }
 }

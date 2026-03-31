@@ -1,14 +1,10 @@
-using StealthPane.Terminal;
-
 namespace StealthPane.Services;
 
 public static class CleanupService
 {
-    public static void CleanupOldCaptures(string? tempDirectory = null)
+    public static void CleanupOldCaptures()
     {
-        var dir = string.IsNullOrEmpty(tempDirectory)
-            ? PlatformHelper.GetBaseDirectory()
-            : tempDirectory;
+        var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
 
         if (!Directory.Exists(dir))
         {

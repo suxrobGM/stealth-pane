@@ -12,7 +12,7 @@ Built with .NET 10 and Avalonia UI. Windows only.
 - **Built-in terminal** — Full xterm.js terminal powered by native PTY (winpty via Quick.PtyNet)
 - **Screenshot capture & injection** — Capture full screen, regions, or specific windows and inject them into the active CLI session
 - **Global hotkeys** — Configurable hotkeys for screen capture and opacity cycling
-- **Lightweight** — Ships as a single AOT-compiled native executable
+- **Lightweight** — Ships as a single self-extracting AOT executable via a launcher that embeds the entire app
 
 ## Prerequisites
 
@@ -36,11 +36,14 @@ dotnet run --project src/StealthPane/StealthPane.csproj
 
 ## Publish
 
-Build a single native executable (no .NET runtime required):
+Build a single self-extracting executable (no .NET runtime required):
 
-```bash
-dotnet publish -c Release src/StealthPane/StealthPane.csproj
+```powershell
+cd scripts
+.\publish.ps1
 ```
+
+This publishes the main app, GZip-compresses all files, embeds them into a lightweight AOT launcher, and outputs a single `stealthpane_launcher.exe` at `publish/win-x64/`. On first run, the launcher extracts the app to a local `stealthpane/` directory and launches it.
 
 ## Usage
 
@@ -59,6 +62,9 @@ dotnet publish -c Release src/StealthPane/StealthPane.csproj
 src/
   StealthPane/              Main UI app (Avalonia, MVVM)
   StealthPane.Terminal/     PTY library (winpty)
+  StealthPane.Launcher/     Self-extracting launcher (AOT single exe)
+scripts/
+  publish.ps1               Build + package pipeline
 ```
 
 - **MVVM** with CommunityToolkit.Mvvm source generators

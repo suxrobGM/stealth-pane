@@ -12,6 +12,7 @@
         ExtendClientAreaTitleBarHeightHint="28"
         Background="{StaticResource WindowBg}"
         Topmost="{Binding IsAlwaysOnTop}"
+        ShowInTaskbar="False"
         SystemDecorations="Full">
 
   <Grid RowDefinitions="28,*,20" ColumnDefinitions="*,Auto">

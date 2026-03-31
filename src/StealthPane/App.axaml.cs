@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using StealthPane.Audio;
+using StealthPane.ScreenCapture;
 using StealthPane.Services;
 using StealthPane.Terminal;
 using StealthPane.ViewModels;
@@ -30,14 +32,15 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Services
-        services.AddSingleton<PtyService>();
+        // Modules
+        services.AddTerminal();
+        services.AddScreenCapture();
+        services.AddAudioCapture();
+
+        // App services
         services.AddSingleton<HotkeyService>();
-        services.AddSingleton<AudioCaptureService>();
-        services.AddSingleton<TranscriptionService>();
-        services.AddSingleton<ModelDownloadService>();
-        services.AddSingleton<AudioInjectorService>();
         services.AddSingleton<CaptureInjectorService>();
+        services.AddSingleton<AudioInjectorService>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();

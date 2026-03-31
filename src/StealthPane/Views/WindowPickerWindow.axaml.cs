@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
-using StealthPane.Services;
+using StealthPane.ScreenCapture.Services;
 using StealthPane.ViewModels;
 
 namespace StealthPane.Views;

@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using StealthPane.Audio.Models;
+using StealthPane.Audio.Services;
 using StealthPane.Messages;
 using StealthPane.Models;
+using StealthPane.ScreenCapture.Models;
 using StealthPane.Services;
 
 namespace StealthPane.ViewModels;

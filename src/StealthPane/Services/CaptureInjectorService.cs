@@ -1,5 +1,6 @@
 using System.Text;
-using StealthPane.Models;
+using StealthPane.ScreenCapture.Models;
+using StealthPane.ScreenCapture.Services;
 using StealthPane.Terminal;
 
 namespace StealthPane.Services;

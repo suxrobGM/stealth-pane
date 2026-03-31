@@ -1,6 +1,6 @@
 using Whisper.net;
 
-namespace StealthPane.Services;
+namespace StealthPane.Audio.Services;
 
 /// <summary>
 /// Transcribes audio files using Whisper.net (local whisper.cpp).

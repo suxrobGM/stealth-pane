@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace StealthPane.Models;
+namespace StealthPane.ScreenCapture.Models;
 
 public enum CaptureMode
 {

@@ -1,7 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
-namespace StealthPane.Services;
+namespace StealthPane.Audio.Services;
 
 /// <summary>
 /// Captures system audio (loopback) via NAudio's WasapiLoopbackCapture.

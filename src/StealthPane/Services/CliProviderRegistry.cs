@@ -1,4 +1,5 @@
 using StealthPane.Models;
+using StealthPane.ScreenCapture.Models;
 
 namespace StealthPane.Services;
 

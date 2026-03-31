@@ -1,4 +1,4 @@
-namespace StealthPane.Services;
+namespace StealthPane.ScreenCapture.Services;
 
 public static class CleanupService
 {

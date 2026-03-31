@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace StealthPane.Services;
+namespace StealthPane.ScreenCapture.Services;
 
 public sealed record WindowInfo(nint Handle, string Title);
 

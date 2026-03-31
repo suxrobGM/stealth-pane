@@ -1,4 +1,4 @@
-namespace StealthPane.Models;
+namespace StealthPane.Audio.Models;
 
 public sealed record AudioSettings
 {

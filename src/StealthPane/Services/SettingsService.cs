@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using StealthPane.Audio.Models;
 using StealthPane.Models;
+using StealthPane.ScreenCapture.Models;
 
 namespace StealthPane.Services;
 

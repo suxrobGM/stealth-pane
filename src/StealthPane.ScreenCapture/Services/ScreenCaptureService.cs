@@ -1,9 +1,8 @@
 using System.Runtime.InteropServices;
-using StealthPane.Models;
-using StealthPane.Terminal;
-using StealthPane.Utilities;
+using StealthPane.ScreenCapture.Models;
+using StealthPane.ScreenCapture.Utilities;
 
-namespace StealthPane.Services;
+namespace StealthPane.ScreenCapture.Services;
 
 public static partial class ScreenCaptureService
 {

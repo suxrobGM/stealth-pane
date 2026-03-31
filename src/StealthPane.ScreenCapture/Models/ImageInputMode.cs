@@ -1,4 +1,4 @@
-namespace StealthPane.Models;
+namespace StealthPane.ScreenCapture.Models;
 
 public enum ImageInputMode
 {

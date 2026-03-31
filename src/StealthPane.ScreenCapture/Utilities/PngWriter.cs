@@ -1,6 +1,6 @@
 using System.IO.Compression;
 
-namespace StealthPane.Utilities;
+namespace StealthPane.ScreenCapture.Utilities;
 
 /// <summary>
 ///     Writes raw RGBA pixel data as a PNG file.

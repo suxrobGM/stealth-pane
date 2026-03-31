@@ -1,6 +1,6 @@
 using System.Net.Http;
 
-namespace StealthPane.Services;
+namespace StealthPane.Audio.Services;
 
 /// <summary>
 /// Downloads Whisper model files from Hugging Face with progress reporting.

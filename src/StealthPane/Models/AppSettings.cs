@@ -1,3 +1,6 @@
+using StealthPane.Audio.Models;
+using StealthPane.ScreenCapture.Models;
+
 namespace StealthPane.Models;
 
 public sealed record class AppSettings

@@ -11,7 +11,8 @@ Built with .NET 10 and Avalonia UI. Windows only.
 - **Multiple CLI providers** — Switch between Claude Code, Codex, and Gemini CLI from the title bar
 - **Built-in terminal** — Full xterm.js terminal powered by native PTY (winpty via Quick.PtyNet)
 - **Screenshot capture & injection** — Capture full screen, regions, or specific windows and inject them into the active CLI session
-- **Global hotkeys** — Configurable hotkeys for screen capture and opacity cycling
+- **Meeting audio capture** — Record system audio (WASAPI loopback), transcribe with Whisper, and send to the CLI for analysis
+- **Global hotkeys** — Configurable hotkeys for screen capture, audio recording, and opacity cycling
 - **Lightweight** — Ships as a single self-extracting AOT executable via a launcher that embeds the entire app
 
 ## Prerequisites
@@ -54,21 +55,25 @@ This publishes the main app, GZip-compresses all files, embeds them into a light
 | Adjust opacity | Settings > General > Opacity slider |
 | Toggle always-on-top | Pin button in title bar |
 | Capture screenshot | `Ctrl+Shift+C` (configurable in settings) |
+| Record meeting audio | `Ctrl+Shift+A` (press again to stop, transcribe, and send) |
 | Cycle opacity | `Ctrl+Shift+O` (configurable in settings) |
 
 ## Architecture
 
 ```
 src/
-  StealthPane/              Main UI app (Avalonia, MVVM)
-  StealthPane.Terminal/     PTY library (winpty)
-  StealthPane.Launcher/     Self-extracting launcher (AOT single exe)
+  StealthPane/                Main UI app (Avalonia, MVVM)
+  StealthPane.Terminal/       PTY library (winpty)
+  StealthPane.ScreenCapture/  Screenshot capture module (Win32 GDI)
+  StealthPane.Audio/          Audio capture (NAudio WASAPI) + transcription (Whisper.net)
+  StealthPane.Launcher/       Self-extracting launcher (AOT single exe)
 scripts/
-  publish.ps1               Build + package pipeline
+  publish.ps1                 Build + package pipeline
 ```
 
+- **Modular** — Terminal, ScreenCapture, and Audio are independent modules with zero inter-module dependencies
 - **MVVM** with CommunityToolkit.Mvvm source generators
-- **Dependency injection** via Microsoft.Extensions.DependencyInjection
+- **Dependency injection** via `services.AddTerminal()`, `services.AddScreenCapture()`, `services.AddAudioCapture()`
 - **Messaging** with `WeakReferenceMessenger` for decoupled communication
 - **Native interop** via `LibraryImport` for Win32 APIs
 

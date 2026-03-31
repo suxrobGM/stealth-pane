@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StealthPane.Services;
+using StealthPane.ScreenCapture.Services;
 
 namespace StealthPane.ViewModels;
 

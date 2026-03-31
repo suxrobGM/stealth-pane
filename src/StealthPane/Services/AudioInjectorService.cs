@@ -1,6 +1,8 @@
 using System.Text;
-using StealthPane.Models;
+using StealthPane.Audio.Models;
 using StealthPane.Terminal;
+
+using StealthPane.Audio.Services;
 
 namespace StealthPane.Services;
 

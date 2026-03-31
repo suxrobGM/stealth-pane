@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using StealthPane.Models;
 using StealthPane.Terminal;
+using StealthPane.Utilities;
 
 namespace StealthPane.Services;
 
@@ -9,11 +10,11 @@ public static partial class ScreenCaptureService
     public static string Capture(CaptureSettings settings)
     {
         var tempDir = string.IsNullOrEmpty(settings.TempDirectory)
-            ? PlatformHelper.GetTempDirectory()
+            ? PlatformHelper.GetBaseDirectory()
             : settings.TempDirectory;
 
         Directory.CreateDirectory(tempDir);
-        var filePath = Path.Combine(tempDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bmp");
+        var filePath = Path.Combine(tempDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
 
         if (OperatingSystem.IsWindows())
         {
@@ -51,14 +52,14 @@ public static partial class ScreenCaptureService
         BitBlt(hdcMem, 0, 0, width, height, hdcScreen, x, y, SRCCOPY);
 
         SelectObject(hdcMem, hOld);
-        SaveHBitmapAsBmp(hBitmap, width, height, filePath);
+        SaveHBitmapAsPng(hBitmap, width, height, filePath);
 
         DeleteObject(hBitmap);
         DeleteDC(hdcMem);
         ReleaseDC(IntPtr.Zero, hdcScreen);
     }
 
-    private static void SaveHBitmapAsBmp(IntPtr hBitmap, int width, int height, string filePath)
+    private static void SaveHBitmapAsPng(IntPtr hBitmap, int width, int height, string filePath)
     {
         var bmi = new BITMAPINFO
         {
@@ -78,26 +79,8 @@ public static partial class ScreenCaptureService
         GetDIBits(hdcScreen, hBitmap, 0, (uint)height, pixels, ref bmi, 0);
         ReleaseDC(IntPtr.Zero, hdcScreen);
 
-        using var fs = File.Create(filePath);
-        var fileSize = 14 + 40 + pixels.Length;
-
-        fs.Write("BM"u8);
-        fs.Write(BitConverter.GetBytes(fileSize));
-        fs.Write(BitConverter.GetBytes(0));
-        fs.Write(BitConverter.GetBytes(14 + 40));
-
-        fs.Write(BitConverter.GetBytes(40));
-        fs.Write(BitConverter.GetBytes(width));
-        fs.Write(BitConverter.GetBytes(height));
-        fs.Write(BitConverter.GetBytes((short)1));
-        fs.Write(BitConverter.GetBytes((short)32));
-        fs.Write(new byte[24]);
-
-        var stride = width * 4;
-        for (var row = height - 1; row >= 0; row--)
-        {
-            fs.Write(pixels, row * stride, stride);
-        }
+        PngWriter.ConvertBgraToRgba(pixels);
+        PngWriter.Write(filePath, width, height, pixels);
     }
 
     private static void CaptureMacOs(string filePath, CaptureSettings settings)

@@ -5,11 +5,11 @@ public static class PlatformHelper
     public static bool IsWindows => OperatingSystem.IsWindows();
     public static bool IsMacOS => OperatingSystem.IsMacOS();
 
-    private static readonly string TempDir = Path.Combine(Path.GetTempPath(), "stealthpane");
+    private static readonly string BaseDir = Path.Combine(AppContext.BaseDirectory, "stealthpane");
 
-    public static string GetTempDirectory()
+    public static string GetBaseDirectory()
     {
-        Directory.CreateDirectory(TempDir);
-        return TempDir;
+        Directory.CreateDirectory(BaseDir);
+        return BaseDir;
     }
 }

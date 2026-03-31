@@ -4,14 +4,16 @@ namespace StealthPane.Services;
 
 /// <summary>
 /// Manages global hotkey registration and handling for the application.
-/// Currently supports Windows platform using the Win32 API to register a hotkey and listen for its activation.
-/// When the hotkey is pressed, a callback action is invoked to trigger the desired functionality (e.g., capturing a screenshot).
+/// Registers a Win32 global hotkey and subclasses the window procedure to
+/// intercept WM_HOTKEY messages, invoking the callback when the hotkey is pressed.
 /// </summary>
 public sealed partial class HotkeyService : IDisposable
 {
     private IntPtr hwnd;
+    private IntPtr oldWndProc;
     private const int HOTKEY_ID = 0x1;
     private Action? callback;
+    private WndProcDelegate? wndProcDelegate; // prevent GC collection
     private bool registered;
 
     public bool Register(string hotkeyString, IntPtr windowHandle, Action callback)
@@ -26,11 +28,21 @@ public sealed partial class HotkeyService : IDisposable
 
     public void Unregister()
     {
-        if (registered && OperatingSystem.IsWindows())
+        if (!registered || !OperatingSystem.IsWindows())
         {
-            UnregisterHotKey(hwnd, HOTKEY_ID);
-            registered = false;
+            return;
         }
+
+        UnregisterHotKey(hwnd, HOTKEY_ID);
+
+        if (oldWndProc != IntPtr.Zero)
+        {
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, oldWndProc);
+            oldWndProc = IntPtr.Zero;
+        }
+
+        wndProcDelegate = null;
+        registered = false;
     }
 
     private bool RegisterWindows(string hotkeyString, IntPtr windowHandle, Action callback)
@@ -39,21 +51,27 @@ public sealed partial class HotkeyService : IDisposable
         this.callback = callback;
 
         ParseHotkey(hotkeyString, out var modifiers, out var vk);
-        if (RegisterHotKey(windowHandle, HOTKEY_ID, modifiers, vk))
+        if (!RegisterHotKey(windowHandle, HOTKEY_ID, modifiers, vk))
         {
-            registered = true;
-            return true;
+            return false;
         }
 
-        return false;
+        oldWndProc = GetWindowLongPtr(windowHandle, GWLP_WNDPROC);
+        wndProcDelegate = WndProc;
+        SetWindowLongPtr(windowHandle, GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(wndProcDelegate));
+
+        registered = true;
+        return true;
     }
 
-    public void HandleWindowMessage(uint msg, IntPtr wParam)
+    private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
     {
-        if (msg == 0x0312 && wParam == HOTKEY_ID)
+        if (msg == WM_HOTKEY && wParam == HOTKEY_ID)
         {
             callback?.Invoke();
         }
+
+        return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
     }
 
     private static void ParseHotkey(string hotkey, out uint modifiers, out uint vk)
@@ -87,6 +105,10 @@ public sealed partial class HotkeyService : IDisposable
 
     #region Win32 API Constants and Imports
 
+    private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    private const int GWLP_WNDPROC = -4;
+    private const uint WM_HOTKEY = 0x0312;
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
@@ -99,6 +121,15 @@ public sealed partial class HotkeyService : IDisposable
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+    private static partial IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static partial IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [LibraryImport("user32.dll", EntryPoint = "CallWindowProcW")]
+    private static partial IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     #endregion
 }

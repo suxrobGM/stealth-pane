@@ -21,7 +21,7 @@ No test projects exist yet.
 
 - **Framework:** .NET 10, Avalonia 11.3, PublishAot, full trim
 - **Pattern:** MVVM with CommunityToolkit.Mvvm (source generators)
-- **DI:** Microsoft.Extensions.DependencyInjection (all singletons)
+- **DI:** Microsoft.Extensions.DependencyInjection — only stateful services (`PtyService`, `CleanupService`, `HotkeyService`) and ViewModels are registered as singletons. Stateless services (`SettingsService`, `CliProviderRegistry`, `ScreenCaptureService`, `CaptureInjectorService`, `ContentProtectionService`) are static classes.
 - **Messaging:** CommunityToolkit.Mvvm `WeakReferenceMessenger` with explicit `Register<T>` (no `RegisterAll` — AOT incompatible)
 - **Terminal:** xterm.js in `NativeWebView` (WebView2 on Windows), bridged via PTY
 
@@ -37,9 +37,16 @@ src/
     Controls/               # TerminalWebView (NativeWebView wrapper)
     Messages/               # Messenger record types
     Themes/                 # Theme.axaml (brushes), Styles.axaml (component styles)
-  StealthPane.Terminal/     # PTY library (ConPTY on Windows, forkpty on macOS)
+    Utilities/              # Window opacity helpers
+  StealthPane.Terminal/     # PTY library
     Assets/                 # Embedded xterm.js + terminal.html
 ```
+
+## PTY Implementation
+
+- **Windows:** winpty via `Quick.PtyNet` NuGet package (`WinPtyProvider`). Creates a hidden console and screen-scrapes it to produce VT sequences. Limited to 16 colors but provides real TTY semantics required by interactive CLIs (e.g. Claude Code).
+- **macOS:** forkpty (`MacOsPtyProvider`). Full color support.
+- **ConPTY note:** The native `CreatePseudoConsole` API has a rendering pipeline stall on Windows 11 25H2 (build 26200+) where output stops after 16 bytes of initialization sequences. The `WindowsPtyProvider` (ConPTY) was removed in favor of winpty until Microsoft fixes this.
 
 ## Key Conventions
 
@@ -49,7 +56,7 @@ src/
 - Platform code guarded by `OperatingSystem.IsWindows()` / `OperatingSystem.IsMacOS()`
 - Win32 interop uses `[LibraryImport]` with `partial` static classes
 - All colors defined in `Themes/Theme.axaml`, all styles in `Themes/Styles.axaml`
-- Reusable XAML classes: `Button.chrome`, `TextBlock.section-header`, `TextBlock.field-label`, `Border.divider`, `*.form-input`
+- Reusable XAML classes: `Button.chrome`, `Button.chrome.pinned`, `TextBlock.section-header`, `TextBlock.field-label`, `Border.divider`, `*.form-input`
 - Settings persisted to `%APPDATA%/StealthPane/settings.json` via `System.Text.Json` source gen
 - Code-behind kept minimal — only platform-specific ops (Win32 opacity, terminal lifecycle, window chrome, drag)
 - Content protection disabled in DEBUG builds for screenshot debugging

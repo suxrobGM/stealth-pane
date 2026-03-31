@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StealthPane.Models;
+using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
@@ -10,10 +11,7 @@ internal sealed partial class AppSettingsJsonContext : JsonSerializerContext;
 
 public static class SettingsService
 {
-    private static readonly string SettingsDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "StealthPane");
-
+    private static readonly string SettingsDir = PlatformHelper.GetBaseDirectory();
     private static readonly string SettingsPath = Path.Combine(SettingsDir, "settings.json");
 
     public static AppSettings Load()

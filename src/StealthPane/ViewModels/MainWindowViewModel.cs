@@ -63,6 +63,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     public static CliProviderConfig GetActiveProvider() => CliProviderRegistry.GetActiveProvider();
 
+    public void CaptureScreen()
+    {
+        var provider = GetActiveProvider();
+        if (!provider.SupportsImageInput)
+        {
+            return;
+        }
+
+        CaptureInjectorService.CaptureAndInject(PtyService, provider, Settings.Capture);
+    }
+
     public void Initialize()
     {
         initialized = true;

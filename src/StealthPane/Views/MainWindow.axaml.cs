@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
+using StealthPane.Services;
 using StealthPane.Utilities;
 using StealthPane.ViewModels;
 
@@ -14,10 +15,12 @@ public sealed partial class MainWindow : Window,
     IRecipient<ApplyOpacityMessage>
 {
     private readonly MainWindowViewModel viewModel;
+    private readonly HotkeyService hotkeyService;
 
     public MainWindow()
     {
         viewModel = App.Services.GetRequiredService<MainWindowViewModel>();
+        hotkeyService = App.Services.GetRequiredService<HotkeyService>();
         DataContext = viewModel;
 
         InitializeComponent();
@@ -41,6 +44,7 @@ public sealed partial class MainWindow : Window,
         Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
 
         viewModel.Initialize();
+        RegisterGlobalHotkey();
     }
 
     public void Receive(SwitchTerminalMessage message)
@@ -73,6 +77,7 @@ public sealed partial class MainWindow : Window,
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
+        hotkeyService.Dispose();
         viewModel.PtyService.Stop();
         Terminal.Dispose();
         viewModel.PtyService.Dispose();
@@ -87,5 +92,21 @@ public sealed partial class MainWindow : Window,
         {
             BeginMoveDrag(e);
         }
+    }
+
+    private void RegisterGlobalHotkey()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        var hwnd = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        hotkeyService.Register(viewModel.Settings.Capture.Hotkey, hwnd, viewModel.CaptureScreen);
     }
 }

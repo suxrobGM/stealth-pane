@@ -16,7 +16,7 @@ public sealed class CleanupService : IDisposable
     public void Start(string tempDirectory, int cleanupMinutes)
     {
         this.tempDirectory = string.IsNullOrEmpty(tempDirectory)
-            ? PlatformHelper.GetTempDirectory()
+            ? PlatformHelper.GetBaseDirectory()
             : tempDirectory;
         this.cleanupMinutes = cleanupMinutes;
 

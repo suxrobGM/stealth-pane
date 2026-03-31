@@ -13,7 +13,7 @@ public static class TerminalAssets
             return AssetDir;
         }
 
-        AssetDir = Path.Combine(PlatformHelper.GetTempDirectory(), "terminal-assets");
+        AssetDir = Path.Combine(PlatformHelper.GetBaseDirectory(), "terminal-assets");
         Directory.CreateDirectory(AssetDir);
 
         var assembly = typeof(TerminalAssets).Assembly;

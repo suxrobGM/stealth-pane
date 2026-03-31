@@ -4,7 +4,7 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
-public sealed partial class ScreenCaptureService
+public static partial class ScreenCaptureService
 {
     public static string Capture(CaptureSettings settings)
     {

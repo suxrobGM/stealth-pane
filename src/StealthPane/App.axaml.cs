@@ -31,10 +31,7 @@ public partial class App : Application
     private static void ConfigureServices(IServiceCollection services)
     {
         // Services
-        services.AddSingleton<CliProviderRegistry>();
         services.AddSingleton<PtyService>();
-        services.AddSingleton<ScreenCaptureService>();
-        services.AddSingleton<CaptureInjectorService>();
         services.AddSingleton<HotkeyService>();
         services.AddSingleton<CleanupService>();
 

@@ -4,7 +4,7 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
-public sealed class CaptureInjectorService
+public static class CaptureInjectorService
 {
     public static void CaptureAndInject(PtyService pty, CliProviderConfig provider, CaptureSettings settings)
     {

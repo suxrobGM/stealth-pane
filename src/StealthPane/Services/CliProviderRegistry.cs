@@ -7,7 +7,7 @@ namespace StealthPane.Services;
 /// It allows retrieval of all providers, fetching a specific provider by ID, and managing the active provider based on user settings.
 /// Custom providers can be added or removed, with changes persisted to the application settings.
 /// </summary>
-public sealed class CliProviderRegistry
+public static class CliProviderRegistry
 {
     private static readonly List<CliProviderConfig> BuiltInProviders =
     [

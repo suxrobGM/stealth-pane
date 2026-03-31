@@ -14,7 +14,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<OpacityChangedMessage>,
     IRecipient<SettingsProviderChangedMessage>
 {
-    private readonly CliProviderRegistry providerRegistry;
     private readonly SettingsViewModel settingsViewModel;
     private readonly CleanupService cleanupService;
     private bool initialized;
@@ -44,12 +43,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
     public MainWindowViewModel(
-        CliProviderRegistry providerRegistry,
         PtyService ptyService,
         SettingsViewModel settingsViewModel,
         CleanupService cleanupService)
     {
-        this.providerRegistry = providerRegistry;
         this.settingsViewModel = settingsViewModel;
         this.cleanupService = cleanupService;
         PtyService = ptyService;

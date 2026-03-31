@@ -8,6 +8,7 @@ public sealed record SettingsProviderChangedMessage(int Index);
 
 // MainWindowViewModel -> View
 public sealed record SwitchTerminalMessage(CliProviderConfig Provider);
+public sealed record FallbackToShellMessage;
 public sealed record ApplyOpacityMessage(double Opacity);
 
 // Settings -> MainWindow: re-register hotkeys

@@ -20,6 +20,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     private readonly SettingsViewModel settingsViewModel;
     private IntPtr hwnd;
     private bool initialized;
+    private bool switching;
 
     public MainWindowViewModel(
         PtyService ptyService,
@@ -123,9 +124,21 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     {
         hwnd = windowHandle;
         initialized = true;
+        PtyService.ProcessExited += OnProcessExited;
         cleanupService.Start(Settings.Capture.TempDirectory, Settings.Capture.AutoCleanupMinutes);
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
         RegisterGlobalHotkeys();
+    }
+
+    private void OnProcessExited(int _)
+    {
+        if (switching)
+        {
+            return;
+        }
+
+        PtyService.Stop();
+        WeakReferenceMessenger.Default.Send(new FallbackToShellMessage());
     }
 
     public void Cleanup()
@@ -193,7 +206,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
         if (initialized)
         {
+            switching = true;
             WeakReferenceMessenger.Default.Send(new SwitchTerminalMessage(provider));
+            switching = false;
         }
     }
 

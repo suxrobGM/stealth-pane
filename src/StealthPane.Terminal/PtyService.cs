@@ -14,7 +14,20 @@ public sealed class PtyService : IDisposable
         provider = CreateProvider();
         provider.OutputReceived += data => OutputReceived?.Invoke(data);
         provider.ProcessExited += code => ProcessExited?.Invoke(code);
-        provider.Start(command, args, workingDirectory, cols, rows);
+
+        try
+        {
+            provider.Start(command, args, workingDirectory, cols, rows);
+        }
+        catch (Exception ex)
+        {
+            provider?.Dispose();
+            provider = null;
+
+            var error = $"\x1b[31mFailed to start '{command}': {ex.Message}\x1b[0m\r\n";
+            OutputReceived?.Invoke(System.Text.Encoding.UTF8.GetBytes(error));
+            ProcessExited?.Invoke(-1);
+        }
     }
 
     public void Write(byte[] data)

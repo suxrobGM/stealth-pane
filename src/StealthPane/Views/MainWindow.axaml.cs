@@ -1,6 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
@@ -11,6 +13,7 @@ namespace StealthPane;
 
 public sealed partial class MainWindow : Window,
     IRecipient<SwitchTerminalMessage>,
+    IRecipient<FallbackToShellMessage>,
     IRecipient<ApplyOpacityMessage>,
     IRecipient<RequestRegionSelectionMessage>,
     IRecipient<RequestWindowSelectionMessage>
@@ -35,6 +38,7 @@ public sealed partial class MainWindow : Window,
 #endif
 
         WeakReferenceMessenger.Default.Register<SwitchTerminalMessage>(this);
+        WeakReferenceMessenger.Default.Register<FallbackToShellMessage>(this);
         WeakReferenceMessenger.Default.Register<ApplyOpacityMessage>(this);
         WeakReferenceMessenger.Default.Register<RequestRegionSelectionMessage>(this);
         WeakReferenceMessenger.Default.Register<RequestWindowSelectionMessage>(this);
@@ -93,6 +97,11 @@ public sealed partial class MainWindow : Window,
 
     private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
 
+    public void Receive(FallbackToShellMessage message)
+    {
+        Terminal.StartProcess("cmd.exe", [], Environment.CurrentDirectory);
+    }
+
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
@@ -107,6 +116,18 @@ public sealed partial class MainWindow : Window,
         var pos = e.GetPosition(this);
         if (pos.Y <= 28 && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
+            // Don't drag if clicking on an interactive control
+            var source = e.Source as Visual;
+            while (source is not null && source != this)
+            {
+                if (source is Button or ComboBox)
+                {
+                    return;
+                }
+
+                source = source.GetVisualParent();
+            }
+
             BeginMoveDrag(e);
         }
     }

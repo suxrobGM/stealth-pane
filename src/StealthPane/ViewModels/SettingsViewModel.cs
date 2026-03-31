@@ -39,9 +39,6 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     public partial string SystemPrompt { get; set; } = "";
 
     [ObservableProperty]
-    public partial decimal CleanupMinutes { get; set; } = 30;
-
-    [ObservableProperty]
     public partial bool IsRegionMode { get; set; }
 
     [ObservableProperty]
@@ -112,11 +109,7 @@ public sealed partial class SettingsViewModel : ViewModelBase,
         ScheduleSave();
     }
 
-    partial void OnCleanupMinutesChanged(decimal value)
-    {
-        settings.Capture.AutoCleanupMinutes = (int)value;
-        ScheduleSave();
-    }
+
 
     [RelayCommand]
     private void SelectRegion()
@@ -150,8 +143,6 @@ public sealed partial class SettingsViewModel : ViewModelBase,
         Hotkey = settings.Capture.Hotkey;
         OpacityHotkey = settings.OpacityHotkey;
         SystemPrompt = settings.Capture.SystemPrompt;
-        CleanupMinutes = settings.Capture.AutoCleanupMinutes;
-
         if (settings.Capture is { RegionWidth: > 0, RegionHeight: > 0 })
         {
             RegionDisplayText =

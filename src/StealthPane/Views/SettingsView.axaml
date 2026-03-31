@@ -106,22 +106,6 @@
                 Command="{Binding ResetPromptCommand}" />
       </StackPanel>
 
-      <Border Classes="divider" />
-
-      <!-- Cleanup -->
-      <StackPanel Spacing="8">
-        <TextBlock Classes="section-header" Text="CLEANUP" />
-
-        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <TextBlock Classes="field-label" Text="Auto-cleanup after"
-                     VerticalAlignment="Center" />
-          <NumericUpDown Classes="form-input" Width="100"
-                         Minimum="5" Maximum="1440" Increment="5"
-                         Value="{Binding CleanupMinutes}" />
-          <TextBlock Classes="field-label" Text="min"
-                     VerticalAlignment="Center" />
-        </StackPanel>
-      </StackPanel>
 
     </StackPanel>
   </ScrollViewer>

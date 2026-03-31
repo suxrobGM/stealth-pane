@@ -33,7 +33,6 @@ public partial class App : Application
         // Services
         services.AddSingleton<PtyService>();
         services.AddSingleton<HotkeyService>();
-        services.AddSingleton<CleanupService>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();

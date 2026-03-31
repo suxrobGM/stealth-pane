@@ -15,7 +15,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<SettingsProviderChangedMessage>,
     IRecipient<HotkeyChangedMessage>
 {
-    private readonly CleanupService cleanupService;
     private readonly HotkeyService hotkeyService;
     private readonly SettingsViewModel settingsViewModel;
     private IntPtr hwnd;
@@ -25,11 +24,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public MainWindowViewModel(
         PtyService ptyService,
         SettingsViewModel settingsViewModel,
-        CleanupService cleanupService,
         HotkeyService hotkeyService)
     {
         this.settingsViewModel = settingsViewModel;
-        this.cleanupService = cleanupService;
         this.hotkeyService = hotkeyService;
         PtyService = ptyService;
         Settings = SettingsService.Load();
@@ -125,7 +122,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         hwnd = windowHandle;
         initialized = true;
         PtyService.ProcessExited += OnProcessExited;
-        cleanupService.Start(Settings.Capture.TempDirectory, Settings.Capture.AutoCleanupMinutes);
+        CleanupService.CleanupOldCaptures(Settings.Capture.TempDirectory);
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
         RegisterGlobalHotkeys();
     }

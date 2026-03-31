@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -40,7 +41,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public partial string OpacityText { get; set; } = "\u25D0 100%";
 
     [ObservableProperty]
-    public partial IBrush PinForeground { get; set; } = new SolidColorBrush(Color.Parse("#808080"));
+    public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
     public MainWindowViewModel(
         CliProviderRegistry providerRegistry,
@@ -128,8 +129,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         Settings.AlwaysOnTop = value;
         SettingsService.Save(Settings);
         PinForeground = value
-            ? new SolidColorBrush(Color.Parse("#10B981"))
-            : new SolidColorBrush(Color.Parse("#808080"));
+            ? (IBrush)Application.Current!.Resources["AccentBrush"]!
+            : (IBrush)Application.Current!.Resources["SecondaryFg"]!;
     }
 
     partial void OnWindowOpacityChanged(double value)
@@ -155,7 +156,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         IsAlwaysOnTop = Settings.AlwaysOnTop;
         WindowOpacity = Settings.WindowOpacity;
         PinForeground = IsAlwaysOnTop
-            ? new SolidColorBrush(Color.Parse("#10B981"))
-            : new SolidColorBrush(Color.Parse("#808080"));
+            ? (IBrush)Application.Current!.Resources["AccentBrush"]!
+            : (IBrush)Application.Current!.Resources["SecondaryFg"]!;
     }
 }

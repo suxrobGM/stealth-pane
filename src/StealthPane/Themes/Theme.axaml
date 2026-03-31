@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Background tones -->
+    <SolidColorBrush x:Key="WindowBg" Color="#1A1A1A" />
+    <SolidColorBrush x:Key="TitleBarBg" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="PanelBg" Color="#252525" />
+    <SolidColorBrush x:Key="ControlBg" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#333333" />
+
+    <!-- Foreground tones -->
+    <SolidColorBrush x:Key="MutedFg" Color="#555555" />
+    <SolidColorBrush x:Key="SecondaryFg" Color="#808080" />
+    <SolidColorBrush x:Key="TertiaryFg" Color="#999999" />
+    <SolidColorBrush x:Key="PrimaryFg" Color="#D4D4D4" />
+
+    <!-- Accent -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#10B981" />
+
+</ResourceDictionary>

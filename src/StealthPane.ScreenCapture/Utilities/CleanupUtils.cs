@@ -1,9 +1,9 @@
-namespace StealthPane.ScreenCapture.Services;
+namespace StealthPane.ScreenCapture.Utilities;
 
-public static class CleanupService
+public static class CleanupUtils
 {
     /// <summary>
-    /// Cleans up old screenshot and audio capture files from previous sessions to free up disk space.
+    ///     Cleans up old screenshot and audio capture files from previous sessions to free up disk space.
     /// </summary>
     public static void CleanupOldCaptures()
     {

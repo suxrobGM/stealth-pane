@@ -5,14 +5,27 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
-public sealed class CaptureInjectorService(SettingsService settingsService, PtyService pty, CliProviderConfig provider)
+/// <summary>
+///     Captures a screenshot and injects it into the terminal.
+/// </summary>
+public sealed class CaptureInjectorService(
+    SettingsService settingsService,
+    CliProviderRegistry providerRegistry,
+    ScreenCaptureService screenCaptureService,
+    PtyService pty)
 {
     private static readonly byte[] Enter = "\r"u8.ToArray();
 
     public void CaptureAndInject()
     {
+        var provider = providerRegistry.GetActiveProvider();
+        if (!provider.SupportsImageInput)
+        {
+            return;
+        }
+
         var capture = settingsService.Settings.Capture;
-        var imagePath = ScreenCaptureService.Capture(capture)
+        var imagePath = screenCaptureService.Capture(capture)
             .Replace('\\', '/');
 
         var prompt = provider.ImageMode switch

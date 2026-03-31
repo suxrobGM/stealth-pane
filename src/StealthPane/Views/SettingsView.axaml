@@ -41,13 +41,18 @@
                   TickFrequency="0.05" IsSnapToTickEnabled="True"
                   Value="{Binding Opacity}" />
         </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Opacity Hotkey" />
+          <controls:HotkeyTextBox Hotkey="{Binding OpacityHotkey, Mode=TwoWay}" />
+        </StackPanel>
       </StackPanel>
 
       <Border Classes="divider" />
 
-      <!-- Capture -->
+      <!-- Screenshot Capture -->
       <StackPanel Spacing="8">
-        <TextBlock Classes="section-header" Text="CAPTURE" />
+        <TextBlock Classes="section-header" Text="SCREENSHOT CAPTURE" />
 
         <StackPanel Spacing="4">
           <TextBlock Classes="field-label" Text="Mode" />
@@ -80,30 +85,20 @@
         </StackPanel>
 
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Capture Hotkey" />
+          <TextBlock Classes="field-label" Text="Hotkey" />
           <controls:HotkeyTextBox Hotkey="{Binding Hotkey, Mode=TwoWay}" />
         </StackPanel>
 
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Opacity Hotkey" />
-          <controls:HotkeyTextBox Hotkey="{Binding OpacityHotkey, Mode=TwoWay}" />
+          <TextBlock Classes="field-label" Text="Prompt" />
+          <TextBox Classes="form-input" Height="80"
+                   AcceptsReturn="True" TextWrapping="Wrap"
+                   Text="{Binding SystemPrompt}" />
+          <Button Content="Reset to Default" FontSize="11" Height="26"
+                  Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                  BorderThickness="0" HorizontalAlignment="Left"
+                  Command="{Binding ResetPromptCommand}" />
         </StackPanel>
-      </StackPanel>
-
-      <Border Classes="divider" />
-
-      <!-- System Prompt -->
-      <StackPanel Spacing="8">
-        <TextBlock Classes="section-header" Text="SYSTEM PROMPT" />
-
-        <TextBox Classes="form-input" Height="100"
-                 AcceptsReturn="True" TextWrapping="Wrap"
-                 Text="{Binding SystemPrompt}" />
-
-        <Button Content="Reset to Default" FontSize="11" Height="26"
-                Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
-                BorderThickness="0" HorizontalAlignment="Left"
-                Command="{Binding ResetPromptCommand}" />
       </StackPanel>
 
       <Border Classes="divider" />
@@ -113,7 +108,7 @@
         <TextBlock Classes="section-header" Text="AUDIO CAPTURE" />
 
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Audio Hotkey" />
+          <TextBlock Classes="field-label" Text="Hotkey" />
           <controls:HotkeyTextBox Hotkey="{Binding AudioHotkey, Mode=TwoWay}" />
         </StackPanel>
 
@@ -131,7 +126,7 @@
         </StackPanel>
 
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Audio Prompt" />
+          <TextBlock Classes="field-label" Text="Prompt" />
           <TextBox Classes="form-input" Height="80"
                    AcceptsReturn="True" TextWrapping="Wrap"
                    Text="{Binding AudioSystemPrompt}" />

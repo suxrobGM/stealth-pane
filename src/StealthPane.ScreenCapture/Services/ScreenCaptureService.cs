@@ -4,57 +4,47 @@ using StealthPane.ScreenCapture.Utilities;
 
 namespace StealthPane.ScreenCapture.Services;
 
-public static partial class ScreenCaptureService
+public sealed partial class ScreenCaptureService
 {
-    public static string Capture(CaptureSettings settings)
+    private static readonly string CapturesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
+
+    public string Capture(CaptureSettings settings)
     {
-        var capturesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
+        Directory.CreateDirectory(CapturesDir);
+        var filePath = Path.Combine(CapturesDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
 
-        Directory.CreateDirectory(capturesDir);
-        var filePath = Path.Combine(capturesDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
-
-        CaptureWindows(filePath, settings);
+        switch (settings.Mode)
+        {
+            case CaptureMode.Window when settings.WindowHandle is not 0:
+                CaptureWindow(filePath, settings.WindowHandle);
+                break;
+            case CaptureMode.Region when settings is { RegionWidth: > 0, RegionHeight: > 0 }:
+                CaptureRect(filePath, settings.RegionX, settings.RegionY, settings.RegionWidth, settings.RegionHeight);
+                break;
+            default:
+                CaptureRect(filePath, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+                break;
+        }
 
         return filePath;
     }
 
-    private static void CaptureWindows(string filePath, CaptureSettings settings)
+    private static void CaptureRect(string filePath, int x, int y, int width, int height)
     {
-        if (settings is { Mode: CaptureMode.Window, WindowHandle: not 0 })
-        {
-            CaptureWindowWindows(filePath, settings.WindowHandle);
-            return;
-        }
-
         var hdcScreen = GetDC(IntPtr.Zero);
-        var screenWidth = GetSystemMetrics(SM_CXSCREEN);
-        var screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-        int x = 0, y = 0, width = screenWidth, height = screenHeight;
-
-        if (settings is { Mode: CaptureMode.Region, RegionWidth: > 0, RegionHeight: > 0 })
+        try
         {
-            x = settings.RegionX;
-            y = settings.RegionY;
-            width = settings.RegionWidth;
-            height = settings.RegionHeight;
+            using var bmp = GdiBitmap.Create(hdcScreen, width, height);
+            BitBlt(bmp.Hdc, 0, 0, width, height, hdcScreen, x, y, SRCCOPY);
+            bmp.SaveAsPng(filePath);
         }
-
-        var hdcMem = CreateCompatibleDC(hdcScreen);
-        var hBitmap = CreateCompatibleBitmap(hdcScreen, width, height);
-        var hOld = SelectObject(hdcMem, hBitmap);
-
-        BitBlt(hdcMem, 0, 0, width, height, hdcScreen, x, y, SRCCOPY);
-
-        SelectObject(hdcMem, hOld);
-        SaveHBitmapAsPng(hBitmap, width, height, filePath);
-
-        DeleteObject(hBitmap);
-        DeleteDC(hdcMem);
-        ReleaseDC(IntPtr.Zero, hdcScreen);
+        finally
+        {
+            ReleaseDC(IntPtr.Zero, hdcScreen);
+        }
     }
 
-    private static void CaptureWindowWindows(string filePath, nint windowHandle)
+    private static void CaptureWindow(string filePath, nint windowHandle)
     {
         if (!WindowEnumerationService.IsWindow(windowHandle))
         {
@@ -64,56 +54,26 @@ public static partial class ScreenCaptureService
         GetWindowRect(windowHandle, out var rect);
         var width = rect.Right - rect.Left;
         var height = rect.Bottom - rect.Top;
-
-        if (width <= 0 || height <= 0)
-        {
-            return;
-        }
+        if (width <= 0 || height <= 0) return;
 
         var hdcScreen = GetDC(IntPtr.Zero);
-        var hdcMem = CreateCompatibleDC(hdcScreen);
-        var hBitmap = CreateCompatibleBitmap(hdcScreen, width, height);
-        var hOld = SelectObject(hdcMem, hBitmap);
-
-        if (!PrintWindow(windowHandle, hdcMem, PW_RENDERFULLCONTENT))
+        try
         {
-            // Fallback: BitBlt from screen at window position
-            BitBlt(hdcMem, 0, 0, width, height, hdcScreen, rect.Left, rect.Top, SRCCOPY);
-        }
-
-        SelectObject(hdcMem, hOld);
-        SaveHBitmapAsPng(hBitmap, width, height, filePath);
-
-        DeleteObject(hBitmap);
-        DeleteDC(hdcMem);
-        ReleaseDC(IntPtr.Zero, hdcScreen);
-    }
-
-    private static void SaveHBitmapAsPng(IntPtr hBitmap, int width, int height, string filePath)
-    {
-        var bmi = new BITMAPINFO
-        {
-            bmiHeader = new BITMAPINFOHEADER
+            using var bmp = GdiBitmap.Create(hdcScreen, width, height);
+            if (!PrintWindow(windowHandle, bmp.Hdc, PW_RENDERFULLCONTENT))
             {
-                biSize = (uint)Marshal.SizeOf<BITMAPINFOHEADER>(),
-                biWidth = width,
-                biHeight = -height,
-                biPlanes = 1,
-                biBitCount = 32,
-                biCompression = 0
+                BitBlt(bmp.Hdc, 0, 0, width, height, hdcScreen, rect.Left, rect.Top, SRCCOPY);
             }
-        };
 
-        var pixels = new byte[width * height * 4];
-        var hdcScreen = GetDC(IntPtr.Zero);
-        GetDIBits(hdcScreen, hBitmap, 0, (uint)height, pixels, ref bmi, 0);
-        ReleaseDC(IntPtr.Zero, hdcScreen);
-
-        PngWriter.ConvertBgraToRgba(pixels);
-        PngWriter.Write(filePath, width, height, pixels);
+            bmp.SaveAsPng(filePath);
+        }
+        finally
+        {
+            ReleaseDC(IntPtr.Zero, hdcScreen);
+        }
     }
 
-    #region Win32 API Constants and Imports
+    #region Win32 API
 
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;
@@ -121,44 +81,11 @@ public static partial class ScreenCaptureService
     private const uint PW_RENDERFULLCONTENT = 0x00000002;
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct BITMAPINFOHEADER
-    {
-        public uint biSize;
-        public int biWidth;
-        public int biHeight;
-        public ushort biPlanes;
-        public ushort biBitCount;
-        public uint biCompression;
-        public uint biSizeImage;
-        public int biXPelsPerMeter;
-        public int biYPelsPerMeter;
-        public uint biClrUsed;
-        public uint biClrImportant;
-    }
+    private struct RECT { public int Left, Top, Right, Bottom; }
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct BITMAPINFO
-    {
-        public BITMAPINFOHEADER bmiHeader;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct RECT
-    {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
-
-    [LibraryImport("user32.dll")]
-    private static partial IntPtr GetDC(IntPtr hWnd);
-
-    [LibraryImport("user32.dll")]
-    private static partial int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-    [LibraryImport("user32.dll")]
-    private static partial int GetSystemMetrics(int nIndex);
+    [LibraryImport("user32.dll")] private static partial IntPtr GetDC(IntPtr hWnd);
+    [LibraryImport("user32.dll")] private static partial int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+    [LibraryImport("user32.dll")] private static partial int GetSystemMetrics(int nIndex);
 
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -169,30 +96,8 @@ public static partial class ScreenCaptureService
     private static partial bool PrintWindow(nint hwnd, nint hdcBlt, uint nFlags);
 
     [LibraryImport("gdi32.dll")]
-    private static partial IntPtr CreateCompatibleDC(IntPtr hdc);
-
-    [LibraryImport("gdi32.dll")]
-    private static partial IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
-
-    [LibraryImport("gdi32.dll")]
-    private static partial IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
-
-    [LibraryImport("gdi32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool BitBlt(IntPtr hdcDest, int xDest, int yDest, int wDest, int hDest, IntPtr hdcSrc,
-        int xSrc, int ySrc, uint rop);
-
-    [LibraryImport("gdi32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DeleteObject(IntPtr hObject);
-
-    [LibraryImport("gdi32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DeleteDC(IntPtr hdc);
-
-    [LibraryImport("gdi32.dll")]
-    private static partial int GetDIBits(IntPtr hdc, IntPtr hbmp, uint uStartScan, uint cScanLines, byte[] lpvBits,
-        ref BITMAPINFO lpbi, uint uUsage);
+    private static partial bool BitBlt(IntPtr dst, int xD, int yD, int w, int h, IntPtr src, int xS, int yS, uint rop);
 
     #endregion
 }

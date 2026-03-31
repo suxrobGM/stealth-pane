@@ -45,6 +45,7 @@ public partial class App : Application
         services.AddSingleton<AudioInjectorService>();
 
         // ViewModels
+        services.AddSingleton<AudioViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<SettingsViewModel>();
     }

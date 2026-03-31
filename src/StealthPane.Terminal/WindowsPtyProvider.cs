@@ -87,9 +87,9 @@ public sealed class WindowsPtyProvider : IPtyProvider
         if (!UpdateProcThreadAttribute(
                 startupInfo.lpAttributeList,
                 0,
-                (IntPtr)PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
+                PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
                 consoleHandle,
-                (IntPtr)IntPtr.Size,
+                nint.Size,
                 IntPtr.Zero,
                 IntPtr.Zero))
         {
@@ -179,7 +179,7 @@ public sealed class WindowsPtyProvider : IPtyProvider
         pipeOut?.Dispose();
     }
 
-    // --- P/Invoke declarations ---
+    #region Platform API Constants and Imports
 
     private const uint EXTENDED_STARTUPINFO_PRESENT = 0x00080000;
     private const int PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE = 0x00020016;
@@ -265,4 +265,6 @@ public sealed class WindowsPtyProvider : IPtyProvider
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
+
+    #endregion
 }

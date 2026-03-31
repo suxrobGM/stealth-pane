@@ -2,6 +2,11 @@ using System.Runtime.InteropServices;
 
 namespace StealthPane.Services;
 
+/// <summary>
+/// Manages global hotkey registration and handling for the application.
+/// Currently supports Windows platform using the Win32 API to register a hotkey and listen for its activation.
+/// When the hotkey is pressed, a callback action is invoked to trigger the desired functionality (e.g., capturing a screenshot).
+/// </summary>
 public sealed partial class HotkeyService : IDisposable
 {
     private IntPtr hwnd;
@@ -80,6 +85,8 @@ public sealed partial class HotkeyService : IDisposable
         Unregister();
     }
 
+    #region Win32 API Constants and Imports
+
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
@@ -92,4 +99,6 @@ public sealed partial class HotkeyService : IDisposable
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    #endregion
 }

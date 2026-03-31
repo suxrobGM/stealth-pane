@@ -22,11 +22,13 @@
 
         <!-- Right: Window controls -->
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0">
-          <Button Classes="chrome" Content="&#x2299;" FontSize="14"
-                  Foreground="{Binding PinForeground}"
+          <Button Classes="chrome" Classes.pinned="{Binding IsAlwaysOnTop}"
+                  Content="&#x2299;" FontSize="14"
                   Command="{Binding TogglePinCommand}" ToolTip.Tip="Toggle always on top" />
-          <Button Classes="chrome" Content="&#x2261;" FontSize="16"
-                  Command="{Binding ToggleSettingsCommand}" ToolTip.Tip="Settings" />
+          <Button Classes="chrome" FontSize="16"
+                  Command="{Binding ToggleSettingsCommand}" ToolTip.Tip="Settings">
+            <TextBlock Text="&#x2261;" VerticalAlignment="Center" Margin="0,-2,0,0" />
+          </Button>
           <Button Classes="chrome" Content="&#x2500;" FontSize="11"
                   Click="OnMinimizeClick" />
           <Button Classes="chrome" Content="&#x25A1;" FontSize="11"

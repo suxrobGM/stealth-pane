@@ -7,7 +7,6 @@
 
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel Margin="16,12" Spacing="16">
-
       <!-- Header -->
       <DockPanel>
         <TextBlock DockPanel.Dock="Left" Text="Settings" FontSize="13"

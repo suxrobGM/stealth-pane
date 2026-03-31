@@ -7,7 +7,7 @@ using StealthPane.Services;
 
 namespace StealthPane.ViewModels;
 
-public sealed partial class SettingsViewModel(CliProviderRegistry providerRegistry) : ViewModelBase
+public sealed partial class SettingsViewModel : ViewModelBase
 {
     private AppSettings settings = SettingsService.Load();
     private Timer? saveTimer;
@@ -77,8 +77,8 @@ public sealed partial class SettingsViewModel(CliProviderRegistry providerRegist
     {
         this.settings = settings;
 
-        var providers = providerRegistry.GetAllProviders();
-        ProviderNames = providers.Select(p => p.Name).ToList();
+        var providers = CliProviderRegistry.GetAllProviders();
+        ProviderNames = [.. providers.Select(p => p.Name)];
 
         var index = providers.ToList().FindIndex(p => p.Id == settings.ActiveProviderId);
         SelectedProviderIndex = index >= 0 ? index : 0;
@@ -95,7 +95,7 @@ public sealed partial class SettingsViewModel(CliProviderRegistry providerRegist
     [RelayCommand]
     private void ResetPrompt()
     {
-        var provider = providerRegistry.GetActiveProvider();
+        var provider = CliProviderRegistry.GetActiveProvider();
         SystemPrompt = provider.DefaultSystemPrompt;
     }
 

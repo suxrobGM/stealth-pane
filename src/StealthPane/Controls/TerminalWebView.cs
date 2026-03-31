@@ -15,6 +15,10 @@ public sealed class TerminalWebView : UserControl, IDisposable
     private int pendingCols;
     private int pendingRows;
 
+    private string? pendingCommand;
+    private string[]? pendingArgs;
+    private string? pendingWorkingDir;
+
     public event Action<int>? ProcessExited;
 
     public void Initialize(PtyService ptyService)
@@ -39,6 +43,12 @@ public sealed class TerminalWebView : UserControl, IDisposable
         {
             ptyService?.Start(command, args, workingDirectory, pendingCols, pendingRows);
         }
+        else
+        {
+            pendingCommand = command;
+            pendingArgs = args;
+            pendingWorkingDir = workingDirectory;
+        }
     }
 
     public void Reset()
@@ -48,9 +58,10 @@ public sealed class TerminalWebView : UserControl, IDisposable
 
     private void OnNavigationCompleted(object? sender, WebViewNavigationCompletedEventArgs e)
     {
-        if (!e.IsSuccess)
+        if (e.IsSuccess)
         {
-            // TODO: show error fallback
+            // Re-send ready in case invokeCSharpAction wasn't injected when terminal.js first ran
+            webView?.InvokeScript("sendMessage({ type: 'ready', cols: term.cols, rows: term.rows })");
         }
     }
 
@@ -73,6 +84,14 @@ public sealed class TerminalWebView : UserControl, IDisposable
                     pendingCols = root.GetProperty("cols").GetInt32();
                     pendingRows = root.GetProperty("rows").GetInt32();
                     terminalReady = true;
+
+                    if (pendingCommand is not null)
+                    {
+                        ptyService?.Start(pendingCommand, pendingArgs!, pendingWorkingDir!, pendingCols, pendingRows);
+                        pendingCommand = null;
+                        pendingArgs = null;
+                        pendingWorkingDir = null;
+                    }
                     break;
 
                 case "input":
@@ -121,7 +140,7 @@ public sealed class TerminalWebView : UserControl, IDisposable
                 return;
             }
 
-            data = outputBuffer.ToArray();
+            data = [.. outputBuffer];
             outputBuffer.Clear();
         }
 

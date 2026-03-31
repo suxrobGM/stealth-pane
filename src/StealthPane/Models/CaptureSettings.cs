@@ -8,7 +8,7 @@ public enum CaptureMode
     Interactive
 }
 
-public sealed class CaptureSettings
+public sealed record CaptureSettings
 {
     public CaptureMode Mode { get; set; } = CaptureMode.FullScreen;
     public int RegionX { get; set; }

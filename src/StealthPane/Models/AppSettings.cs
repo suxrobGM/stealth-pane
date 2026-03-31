@@ -1,6 +1,6 @@
 namespace StealthPane.Models;
 
-public sealed class AppSettings
+public sealed record class AppSettings
 {
     public string ActiveProviderId { get; set; } = "claude-code";
     public double WindowOpacity { get; set; } = 1.0;

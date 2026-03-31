@@ -1,6 +1,6 @@
 namespace StealthPane.Models;
 
-public sealed class CliProviderConfig
+public sealed record CliProviderConfig
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";

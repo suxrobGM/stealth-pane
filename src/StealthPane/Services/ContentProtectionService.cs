@@ -3,11 +3,12 @@ using Avalonia.Controls;
 
 namespace StealthPane.Services;
 
+/// <summary>
+/// Provides functionality to enable content protection on the application window to prevent screen capture and recording.
+/// It supports both Windows and macOS platforms, using platform-specific APIs to achieve the protection.
+/// </summary>
 public static partial class ContentProtectionService
 {
-    private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
-    private const uint WDA_MONITOR = 0x00000001;
-
     public static bool EnableProtection(Window window)
     {
         if (OperatingSystem.IsWindows())
@@ -59,6 +60,11 @@ public static partial class ContentProtectionService
         }
     }
 
+    #region Platform API Imports and Constants
+
+    private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
+    private const uint WDA_MONITOR = 0x00000001;
+
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
@@ -68,4 +74,6 @@ public static partial class ContentProtectionService
 
     [LibraryImport("libobjc.dylib", EntryPoint = "objc_msgSend")]
     private static partial void objc_msgSend_Int64(IntPtr receiver, IntPtr selector, long arg);
+
+    #endregion
 }

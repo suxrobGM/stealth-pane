@@ -64,7 +64,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public AppSettings Settings { get; private set; }
     public PtyService PtyService { get; }
 
-    public CliProviderConfig GetActiveProvider() => providerRegistry.GetActiveProvider();
+    public static CliProviderConfig GetActiveProvider() => CliProviderRegistry.GetActiveProvider();
 
     public void Initialize()
     {
@@ -100,7 +100,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     public void Receive(SettingsProviderChangedMessage message)
     {
-        var providers = providerRegistry.GetAllProviders();
+        var providers = CliProviderRegistry.GetAllProviders();
         if (message.Index >= 0 && message.Index < providers.Count)
         {
             SelectedProviderIndex = message.Index;
@@ -111,7 +111,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     {
         if (value < 0) return;
 
-        var providers = providerRegistry.GetAllProviders();
+        var providers = CliProviderRegistry.GetAllProviders();
         if (value >= providers.Count) return;
 
         var provider = providers[value];
@@ -146,10 +146,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     private void LoadFromSettings()
     {
-        var providers = providerRegistry.GetAllProviders();
+        var providers = CliProviderRegistry.GetAllProviders();
         ProviderNames = providers.Select(p => p.Name).ToList();
 
-        var activeProvider = providerRegistry.GetActiveProvider();
+        var activeProvider = CliProviderRegistry.GetActiveProvider();
         var index = providers.ToList().FindIndex(p => p.Id == activeProvider.Id);
         SelectedProviderIndex = index >= 0 ? index : 0;
 

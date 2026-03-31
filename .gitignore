@@ -56,3 +56,5 @@ nunit-*.xml
 .idea/
 
 *.sln.DotSettings*
+
+.claude/settings.local.json

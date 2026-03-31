@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
-using StealthPane.Services;
+using StealthPane.Utilities;
 using StealthPane.ViewModels;
 
 namespace StealthPane;
@@ -37,7 +37,7 @@ public sealed partial class MainWindow : Window,
 
         Terminal.Initialize(viewModel.PtyService);
 
-        var provider = viewModel.GetActiveProvider();
+        var provider = MainWindowViewModel.GetActiveProvider();
         Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
 
         viewModel.Initialize();
@@ -54,7 +54,7 @@ public sealed partial class MainWindow : Window,
     {
         if (OperatingSystem.IsWindows())
         {
-            WindowOpacityHelper.Apply(this, message.Opacity);
+            WindowOpacityUtils.Apply(this, message.Opacity);
         }
         else
         {

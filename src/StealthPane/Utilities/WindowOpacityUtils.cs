@@ -1,14 +1,10 @@
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
 
-namespace StealthPane.Services;
+namespace StealthPane.Utilities;
 
-internal static partial class WindowOpacityHelper
+internal static partial class WindowOpacityUtils
 {
-    private const int GWL_EXSTYLE = -20;
-    private const nint WS_EX_LAYERED = 0x00080000;
-    private const uint LWA_ALPHA = 0x02;
-
     public static void Apply(Window window, double opacity)
     {
         var handle = window.TryGetPlatformHandle()?.Handle;
@@ -27,6 +23,12 @@ internal static partial class WindowOpacityHelper
         SetLayeredWindowAttributes(handle.Value, 0, alpha, LWA_ALPHA);
     }
 
+    #region Win32 API Constants and Imports
+
+    private const int GWL_EXSTYLE = -20;
+    private const nint WS_EX_LAYERED = 0x00080000;
+    private const uint LWA_ALPHA = 0x02;
+
     [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
     private static partial nint GetWindowLongPtr(IntPtr hWnd, int nIndex);
 
@@ -36,4 +38,6 @@ internal static partial class WindowOpacityHelper
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetLayeredWindowAttributes(IntPtr hWnd, uint crKey, byte bAlpha, uint dwFlags);
+
+    #endregion
 }

@@ -4,11 +4,11 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
-public sealed class CaptureInjectorService(ScreenCaptureService captureService)
+public sealed class CaptureInjectorService
 {
-    public void CaptureAndInject(PtyService pty, CliProviderConfig provider, CaptureSettings settings)
+    public static void CaptureAndInject(PtyService pty, CliProviderConfig provider, CaptureSettings settings)
     {
-        var imagePath = captureService.Capture(settings);
+        var imagePath = ScreenCaptureService.Capture(settings);
 
         var prompt = provider.ImageMode switch
         {

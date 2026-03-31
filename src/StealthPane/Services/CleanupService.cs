@@ -2,6 +2,11 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
+/// <summary>
+/// Periodically cleans up old temporary files created by the capture service to prevent disk bloat.
+/// It looks for files with a "capture_" prefix and deletes those older than a specified age (default 30 minutes).
+/// The cleanup runs every 5 minutes.
+/// </summary>
 public sealed class CleanupService : IDisposable
 {
     private Timer? timer;

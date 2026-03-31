@@ -6,7 +6,7 @@ namespace StealthPane.Services;
 
 public sealed partial class ScreenCaptureService
 {
-    public string Capture(CaptureSettings settings)
+    public static string Capture(CaptureSettings settings)
     {
         var tempDir = string.IsNullOrEmpty(settings.TempDirectory)
             ? PlatformHelper.GetTempDirectory()
@@ -114,7 +114,8 @@ public sealed partial class ScreenCaptureService
         process?.WaitForExit(5000);
     }
 
-    // Windows P/Invoke
+    #region Platform API Constants and Imports
+
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;
     private const uint SRCCOPY = 0x00CC0020;
@@ -173,4 +174,6 @@ public sealed partial class ScreenCaptureService
 
     [LibraryImport("gdi32.dll")]
     private static partial int GetDIBits(IntPtr hdc, IntPtr hbmp, uint uStartScan, uint cScanLines, byte[] lpvBits, ref BITMAPINFO lpbi, uint uUsage);
+
+    #endregion
 }

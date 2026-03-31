@@ -75,9 +75,8 @@
     <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource WindowBg}">
       <DockPanel Margin="12,0">
         <TextBlock DockPanel.Dock="Left" FontSize="10" Foreground="{StaticResource MutedFg}"
-                   VerticalAlignment="Center">
-          <Run Text="&#x2328;" /><Run Text=" Ctrl+Shift+C" />
-        </TextBlock>
+                   VerticalAlignment="Center"
+                   Text="{Binding CaptureHotkeyText}" />
         <TextBlock DockPanel.Dock="Right" FontSize="10"
                    Foreground="{StaticResource MutedFg}" VerticalAlignment="Center"
                    HorizontalAlignment="Right"

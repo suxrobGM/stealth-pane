@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
-using StealthPane.Services;
 using StealthPane.Utilities;
 using StealthPane.ViewModels;
 
@@ -12,15 +11,15 @@ namespace StealthPane;
 
 public sealed partial class MainWindow : Window,
     IRecipient<SwitchTerminalMessage>,
-    IRecipient<ApplyOpacityMessage>
+    IRecipient<ApplyOpacityMessage>,
+    IRecipient<RequestRegionSelectionMessage>,
+    IRecipient<RequestWindowSelectionMessage>
 {
     private readonly MainWindowViewModel viewModel;
-    private readonly HotkeyService hotkeyService;
 
     public MainWindow()
     {
         viewModel = App.Services.GetRequiredService<MainWindowViewModel>();
-        hotkeyService = App.Services.GetRequiredService<HotkeyService>();
         DataContext = viewModel;
 
         InitializeComponent();
@@ -37,14 +36,16 @@ public sealed partial class MainWindow : Window,
 
         WeakReferenceMessenger.Default.Register<SwitchTerminalMessage>(this);
         WeakReferenceMessenger.Default.Register<ApplyOpacityMessage>(this);
+        WeakReferenceMessenger.Default.Register<RequestRegionSelectionMessage>(this);
+        WeakReferenceMessenger.Default.Register<RequestWindowSelectionMessage>(this);
 
         Terminal.Initialize(viewModel.PtyService);
 
         var provider = MainWindowViewModel.GetActiveProvider();
         Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
 
-        viewModel.Initialize();
-        RegisterGlobalHotkey();
+        var hwnd = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        viewModel.Initialize(hwnd);
     }
 
     public void Receive(SwitchTerminalMessage message)
@@ -66,6 +67,31 @@ public sealed partial class MainWindow : Window,
         }
     }
 
+    public async void Receive(RequestRegionSelectionMessage message)
+    {
+        var overlay = new Views.RegionSelectionWindow();
+        overlay.Show();
+        var result = await overlay.GetSelectionAsync();
+        if (result.HasValue)
+        {
+            var r = result.Value;
+            WeakReferenceMessenger.Default.Send(new RegionSelectedMessage(r.X, r.Y, r.Width, r.Height));
+        }
+    }
+
+    public async void Receive(RequestWindowSelectionMessage message)
+    {
+        var ownHandle = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        var windows = Services.WindowEnumerationService.GetVisibleWindows(ownHandle);
+        var picker = new Views.WindowPickerWindow(windows);
+        await picker.ShowDialog(this);
+        var result = await picker.GetSelectionAsync();
+        if (result is not null)
+        {
+            WeakReferenceMessenger.Default.Send(new WindowSelectedMessage(result.Handle, result.Title));
+        }
+    }
+
     private void OnMinimizeClick(object? sender, RoutedEventArgs e) =>
         WindowState = WindowState.Minimized;
 
@@ -77,10 +103,8 @@ public sealed partial class MainWindow : Window,
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
-        hotkeyService.Dispose();
-        viewModel.PtyService.Stop();
+        viewModel.Cleanup();
         Terminal.Dispose();
-        viewModel.PtyService.Dispose();
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -92,21 +116,5 @@ public sealed partial class MainWindow : Window,
         {
             BeginMoveDrag(e);
         }
-    }
-
-    private void RegisterGlobalHotkey()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-
-        var hwnd = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
-        if (hwnd == IntPtr.Zero)
-        {
-            return;
-        }
-
-        hotkeyService.Register(viewModel.Settings.Capture.Hotkey, hwnd, viewModel.CaptureScreen);
     }
 }

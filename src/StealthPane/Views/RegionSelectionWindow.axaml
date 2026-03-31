@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="StealthPane.Views.RegionSelectionWindow"
+        Title="Select Region"
+        SystemDecorations="None"
+        WindowState="FullScreen"
+        Topmost="True"
+        Background="#01000000"
+        Cursor="Cross">
+
+  <Panel>
+    <!-- Dim overlay -->
+    <Border Background="#40000000" />
+
+    <!-- Selection canvas -->
+    <Canvas x:Name="SelectionCanvas" />
+
+    <!-- Instructions -->
+    <TextBlock Text="Click and drag to select a region. Press Escape to cancel."
+               FontSize="14" Foreground="#CCFFFFFF"
+               HorizontalAlignment="Center" VerticalAlignment="Top"
+               Margin="0,40,0,0" />
+  </Panel>
+</Window>

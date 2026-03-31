@@ -12,11 +12,14 @@ namespace StealthPane.ViewModels;
 
 public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<OpacityChangedMessage>,
-    IRecipient<SettingsProviderChangedMessage>
+    IRecipient<SettingsProviderChangedMessage>,
+    IRecipient<HotkeyChangedMessage>
 {
     private readonly SettingsViewModel settingsViewModel;
     private readonly CleanupService cleanupService;
+    private readonly HotkeyService hotkeyService;
     private bool initialized;
+    private IntPtr hwnd;
 
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
@@ -40,15 +43,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public partial string OpacityText { get; set; } = "\u25D0 100%";
 
     [ObservableProperty]
+    public partial string CaptureHotkeyText { get; set; } = "\u2328 Ctrl+Shift+C";
+
+    [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
     public MainWindowViewModel(
         PtyService ptyService,
         SettingsViewModel settingsViewModel,
-        CleanupService cleanupService)
+        CleanupService cleanupService,
+        HotkeyService hotkeyService)
     {
         this.settingsViewModel = settingsViewModel;
         this.cleanupService = cleanupService;
+        this.hotkeyService = hotkeyService;
         PtyService = ptyService;
         Settings = SettingsService.Load();
 
@@ -56,6 +64,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
         WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<HotkeyChangedMessage>(this);
     }
 
     public AppSettings Settings { get; private set; }
@@ -74,11 +83,21 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         CaptureInjectorService.CaptureAndInject(PtyService, provider, Settings.Capture);
     }
 
-    public void Initialize()
+    public void Initialize(IntPtr windowHandle)
     {
+        hwnd = windowHandle;
         initialized = true;
         cleanupService.Start(Settings.Capture.TempDirectory, Settings.Capture.AutoCleanupMinutes);
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
+        RegisterGlobalHotkeys();
+    }
+
+    public void Cleanup()
+    {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+        hotkeyService.Dispose();
+        PtyService.Stop();
+        PtyService.Dispose();
     }
 
     [RelayCommand]
@@ -92,6 +111,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     {
         if (IsSettingsVisible)
         {
+            settingsViewModel.Unload();
             IsSettingsVisible = false;
             return;
         }
@@ -99,6 +119,23 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         settingsViewModel.Load(Settings);
         SettingsContent = settingsViewModel;
         IsSettingsVisible = true;
+    }
+
+    public void CycleOpacity()
+    {
+        var presets = new[] { 1.0, 0.8, 0.6, 0.4 };
+        var current = WindowOpacity;
+        var next = 1.0;
+        for (var i = 0; i < presets.Length; i++)
+        {
+            if (current > presets[i] + 0.01)
+            {
+                next = presets[i];
+                break;
+            }
+        }
+
+        WindowOpacity = next;
     }
 
     public void Receive(OpacityChangedMessage message)
@@ -112,6 +149,25 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         if (message.Index >= 0 && message.Index < providers.Count)
         {
             SelectedProviderIndex = message.Index;
+        }
+    }
+
+    public void Receive(HotkeyChangedMessage message)
+    {
+        if (message.Name == "capture")
+        {
+            CaptureHotkeyText = $"\u2328 {message.Hotkey}";
+            if (hwnd != IntPtr.Zero)
+            {
+                hotkeyService.Register("capture", message.Hotkey, hwnd, CaptureScreen);
+            }
+        }
+        else if (message.Name == "opacity")
+        {
+            if (hwnd != IntPtr.Zero)
+            {
+                hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
+            }
         }
     }
 
@@ -152,6 +208,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         }
     }
 
+    private void RegisterGlobalHotkeys()
+    {
+        if (!OperatingSystem.IsWindows() || hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        hotkeyService.Register("capture", Settings.Capture.Hotkey, hwnd, CaptureScreen);
+        hotkeyService.Register("opacity", Settings.OpacityHotkey, hwnd, CycleOpacity);
+    }
+
     private void LoadFromSettings()
     {
         var providers = CliProviderRegistry.GetAllProviders();
@@ -163,6 +230,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
         IsAlwaysOnTop = Settings.AlwaysOnTop;
         WindowOpacity = Settings.WindowOpacity;
+        CaptureHotkeyText = $"\u2328 {Settings.Capture.Hotkey}";
         PinForeground = IsAlwaysOnTop
             ? (IBrush)Application.Current!.Resources["AccentBrush"]!
             : (IBrush)Application.Current!.Resources["SecondaryFg"]!;

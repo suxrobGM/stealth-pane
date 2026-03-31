@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:StealthPane.ViewModels"
+             xmlns:controls="using:StealthPane.Controls"
              x:Class="StealthPane.Views.SettingsView"
              x:DataType="vm:SettingsViewModel"
              Width="300" Background="{StaticResource PanelBg}">
@@ -55,14 +56,37 @@
             <ComboBoxItem Content="Full Screen" />
             <ComboBoxItem Content="Region" />
             <ComboBoxItem Content="Window" />
-            <ComboBoxItem Content="Interactive" />
           </ComboBox>
         </StackPanel>
 
+        <!-- Region mode options -->
+        <StackPanel Spacing="4" IsVisible="{Binding IsRegionMode}">
+          <Button Content="Select Region" FontSize="11" Height="28"
+                  Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                  BorderThickness="0" HorizontalAlignment="Left"
+                  Command="{Binding SelectRegionCommand}" />
+          <TextBlock Classes="field-label" Text="{Binding RegionDisplayText}"
+                     IsVisible="{Binding RegionDisplayText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+
+        <!-- Window mode options -->
+        <StackPanel Spacing="4" IsVisible="{Binding IsWindowMode}">
+          <Button Content="Select Window" FontSize="11" Height="28"
+                  Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                  BorderThickness="0" HorizontalAlignment="Left"
+                  Command="{Binding SelectWindowCommand}" />
+          <TextBlock Classes="field-label" Text="{Binding SelectedWindowTitle}"
+                     IsVisible="{Binding SelectedWindowTitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Hotkey" />
-          <TextBox Classes="form-input" Height="28"
-                   Text="{Binding Hotkey}" />
+          <TextBlock Classes="field-label" Text="Capture Hotkey" />
+          <controls:HotkeyTextBox Hotkey="{Binding Hotkey, Mode=TwoWay}" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Opacity Hotkey" />
+          <controls:HotkeyTextBox Hotkey="{Binding OpacityHotkey, Mode=TwoWay}" />
         </StackPanel>
       </StackPanel>
 

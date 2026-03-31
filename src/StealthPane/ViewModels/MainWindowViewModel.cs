@@ -13,9 +13,13 @@ namespace StealthPane.ViewModels;
 public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<OpacityChangedMessage>,
     IRecipient<SettingsProviderChangedMessage>,
-    IRecipient<HotkeyChangedMessage>
+    IRecipient<HotkeyChangedMessage>,
+    IRecipient<ModelDownloadRequestedMessage>
 {
     private readonly HotkeyService hotkeyService;
+    private readonly AudioInjectorService audioInjectorService;
+    private readonly CaptureInjectorService captureInjectorService;
+    private readonly ModelDownloadService modelDownloadService;
     private readonly SettingsViewModel settingsViewModel;
     private IntPtr hwnd;
     private bool initialized;
@@ -24,10 +28,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public MainWindowViewModel(
         PtyService ptyService,
         SettingsViewModel settingsViewModel,
-        HotkeyService hotkeyService)
+        HotkeyService hotkeyService,
+        AudioInjectorService audioInjectorService,
+        CaptureInjectorService captureInjectorService,
+        ModelDownloadService modelDownloadService)
     {
         this.settingsViewModel = settingsViewModel;
         this.hotkeyService = hotkeyService;
+        this.audioInjectorService = audioInjectorService;
+        this.captureInjectorService = captureInjectorService;
+        this.modelDownloadService = modelDownloadService;
         PtyService = ptyService;
         Settings = SettingsService.Load();
 
@@ -36,6 +46,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<HotkeyChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<ModelDownloadRequestedMessage>(this);
     }
 
     [ObservableProperty]
@@ -63,6 +74,21 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public partial string CaptureHotkeyText { get; set; } = "\u2328 Ctrl+Shift+C";
 
     [ObservableProperty]
+    public partial bool IsRecording { get; set; }
+
+    [ObservableProperty]
+    public partial string AudioHotkeyText { get; set; } = "\u23FA Ctrl+Shift+A";
+
+    [ObservableProperty]
+    public partial bool IsModelAvailable { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsModelDownloading { get; set; }
+
+    [ObservableProperty]
+    public partial string ModelStatusText { get; set; } = "";
+
+    [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
     public AppSettings Settings { get; }
@@ -85,6 +111,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
                 hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
             }
         }
+        else if (message.Name == "audio")
+        {
+            AudioHotkeyText = $"\u23FA {message.Hotkey}";
+            if (IsModelAvailable)
+            {
+                RegisterAudioHotkey();
+            }
+        }
+    }
+
+    public async void Receive(ModelDownloadRequestedMessage message)
+    {
+        var success = await DownloadModelAsync();
+        settingsViewModel.OnDownloadCompleted(success);
     }
 
     public void Receive(OpacityChangedMessage message)
@@ -114,7 +154,76 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return;
         }
 
-        CaptureInjectorService.CaptureAndInject(PtyService, provider, Settings.Capture);
+        captureInjectorService.CaptureAndInject(provider, Settings.Capture);
+    }
+
+    public void ToggleAudioRecording()
+    {
+        if (!IsModelAvailable || IsModelDownloading)
+        {
+            ModelStatusText = "Whisper model not ready";
+            return;
+        }
+
+        var wasRecording = IsRecording;
+        var started = audioInjectorService.Toggle(Settings.Audio, isRec =>
+        {
+            IsRecording = isRec;
+            ModelStatusText = "";
+            WeakReferenceMessenger.Default.Send(new AudioRecordingChangedMessage(isRec));
+        });
+
+        // Only show error if we tried to start (not stop) and it failed
+        if (!started && !wasRecording)
+        {
+            ModelStatusText = audioInjectorService.LastError ?? "Audio capture failed";
+        }
+    }
+
+    private void OnDownloadProgress(long downloaded, long total)
+    {
+        if (total > 0)
+        {
+            var pct = (int)(downloaded * 100 / total);
+            ModelStatusText = $"Downloading model... {downloaded / 1048576.0:F1}/{total / 1048576.0:F0} MB ({pct}%)";
+        }
+        else
+        {
+            ModelStatusText = $"Downloading model... {downloaded / 1048576.0:F1} MB";
+        }
+    }
+
+    public async Task<bool> DownloadModelAsync()
+    {
+        if (IsModelDownloading)
+        {
+            return false;
+        }
+
+        var modelPath = Settings.Audio.ModelPath;
+        var modelFileName = Path.GetFileName(modelPath);
+
+        IsModelDownloading = true;
+        ModelStatusText = "Downloading model...";
+
+        modelDownloadService.DownloadProgress += OnDownloadProgress;
+        var success = await modelDownloadService.DownloadAsync(modelFileName, modelPath);
+        modelDownloadService.DownloadProgress -= OnDownloadProgress;
+
+        IsModelDownloading = false;
+
+        if (success)
+        {
+            IsModelAvailable = true;
+            ModelStatusText = "";
+            RegisterAudioHotkey();
+        }
+        else
+        {
+            ModelStatusText = "Download failed";
+        }
+
+        return success;
     }
 
     public void Initialize(IntPtr windowHandle)
@@ -124,6 +233,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         PtyService.ProcessExited += OnProcessExited;
         CleanupService.CleanupOldCaptures();
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
+        CheckModelAvailability();
         RegisterGlobalHotkeys();
     }
 
@@ -238,6 +348,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
         hotkeyService.Register("capture", Settings.Capture.Hotkey, hwnd, CaptureScreen);
         hotkeyService.Register("opacity", Settings.OpacityHotkey, hwnd, CycleOpacity);
+
+        if (IsModelAvailable)
+        {
+            RegisterAudioHotkey();
+        }
+    }
+
+    private void RegisterAudioHotkey()
+    {
+        if (hwnd != IntPtr.Zero)
+        {
+            hotkeyService.Register("audio", Settings.Audio.Hotkey, hwnd, ToggleAudioRecording);
+        }
+    }
+
+    private void CheckModelAvailability()
+    {
+        IsModelAvailable = ModelDownloadService.ModelExists(Settings.Audio.ModelPath);
+        if (!IsModelAvailable)
+        {
+            ModelStatusText = "Whisper model not found, please download by clicking the button in settings";
+        }
     }
 
     private void LoadFromSettings()
@@ -252,6 +384,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         IsAlwaysOnTop = Settings.AlwaysOnTop;
         WindowOpacity = Settings.WindowOpacity;
         CaptureHotkeyText = $"\u2328 {Settings.Capture.Hotkey}";
+        AudioHotkeyText = $"\u23FA {Settings.Audio.Hotkey}";
         PinForeground = IsAlwaysOnTop
             ? (IBrush)Application.Current!.Resources["AccentBrush"]!
             : (IBrush)Application.Current!.Resources["SecondaryFg"]!;

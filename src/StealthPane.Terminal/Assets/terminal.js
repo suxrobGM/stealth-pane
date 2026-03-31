@@ -83,7 +83,7 @@ function termReset() {
 
 /**
  * Sends a message to the C# code. The message will be serialized as JSON before being sent.
- * @param {string} msg
+ * @param {Record<string, unknown>} msg - The message to send. Must be serializable as JSON.
  * @returns {void}
  */
 function sendMessage(msg) {
@@ -91,14 +91,5 @@ function sendMessage(msg) {
     invokeCSharpAction(JSON.stringify(msg));
   }
 }
-
-// invokeCSharpAction may not be injected yet; poll until available
-// (function waitForBridge() {
-//   if (typeof invokeCSharpAction === "function") {
-//     sendMessage({ type: "ready", cols: term.cols, rows: term.rows });
-//   } else {
-//     setTimeout(waitForBridge, 50);
-//   }
-// })();
 
 sendMessage({ type: "ready", cols: term.cols, rows: term.rows });

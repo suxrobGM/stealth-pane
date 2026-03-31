@@ -106,6 +106,41 @@
                 Command="{Binding ResetPromptCommand}" />
       </StackPanel>
 
+      <Border Classes="divider" />
+
+      <!-- Audio Capture -->
+      <StackPanel Spacing="8">
+        <TextBlock Classes="section-header" Text="AUDIO CAPTURE" />
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Audio Hotkey" />
+          <controls:HotkeyTextBox Hotkey="{Binding AudioHotkey, Mode=TwoWay}" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Whisper Model" />
+          <TextBox Classes="form-input"
+                   Watermark="Path to ggml-*.bin model file"
+                   Text="{Binding AudioModelPath}" />
+          <Button FontSize="11" Height="28"
+                  Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                  BorderThickness="0" HorizontalAlignment="Left"
+                  Command="{Binding DownloadModelCommand}"
+                  IsEnabled="{Binding !IsModelDownloading}"
+                  Content="{Binding DownloadModelButtonText}" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Audio Prompt" />
+          <TextBox Classes="form-input" Height="80"
+                   AcceptsReturn="True" TextWrapping="Wrap"
+                   Text="{Binding AudioSystemPrompt}" />
+          <Button Content="Reset to Default" FontSize="11" Height="26"
+                  Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                  BorderThickness="0" HorizontalAlignment="Left"
+                  Command="{Binding ResetAudioPromptCommand}" />
+        </StackPanel>
+      </StackPanel>
 
     </StackPanel>
   </ScrollViewer>

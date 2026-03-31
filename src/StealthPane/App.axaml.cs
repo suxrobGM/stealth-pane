@@ -33,6 +33,11 @@ public partial class App : Application
         // Services
         services.AddSingleton<PtyService>();
         services.AddSingleton<HotkeyService>();
+        services.AddSingleton<AudioCaptureService>();
+        services.AddSingleton<TranscriptionService>();
+        services.AddSingleton<ModelDownloadService>();
+        services.AddSingleton<AudioInjectorService>();
+        services.AddSingleton<CaptureInjectorService>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();

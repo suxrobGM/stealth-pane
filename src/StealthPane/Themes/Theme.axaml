@@ -16,5 +16,6 @@
 
   <!-- Accent -->
   <SolidColorBrush x:Key="AccentBrush" Color="#10B981" />
+  <SolidColorBrush x:Key="WarningFg" Color="#F59E0B" />
 
 </ResourceDictionary>

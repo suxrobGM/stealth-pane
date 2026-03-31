@@ -39,6 +39,21 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     public partial string SystemPrompt { get; set; } = "";
 
     [ObservableProperty]
+    public partial string AudioHotkey { get; set; } = "Ctrl+Shift+A";
+
+    [ObservableProperty]
+    public partial string AudioModelPath { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string AudioSystemPrompt { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool IsModelDownloading { get; set; }
+
+    [ObservableProperty]
+    public partial string DownloadModelButtonText { get; set; } = "Download Model";
+
+    [ObservableProperty]
     public partial bool IsRegionMode { get; set; }
 
     [ObservableProperty]
@@ -109,7 +124,24 @@ public sealed partial class SettingsViewModel : ViewModelBase,
         ScheduleSave();
     }
 
+    partial void OnAudioHotkeyChanged(string value)
+    {
+        settings.Audio.Hotkey = value;
+        WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("audio", value));
+        ScheduleSave();
+    }
 
+    partial void OnAudioModelPathChanged(string value)
+    {
+        settings.Audio.ModelPath = value;
+        ScheduleSave();
+    }
+
+    partial void OnAudioSystemPromptChanged(string value)
+    {
+        settings.Audio.SystemPrompt = value;
+        ScheduleSave();
+    }
 
     [RelayCommand]
     private void SelectRegion()
@@ -155,6 +187,13 @@ public sealed partial class SettingsViewModel : ViewModelBase,
 
         SelectedWindowTitle = settings.Capture.WindowTitle;
 
+        AudioHotkey = settings.Audio.Hotkey;
+        AudioModelPath = settings.Audio.ModelPath;
+        AudioSystemPrompt = settings.Audio.SystemPrompt;
+        DownloadModelButtonText = ModelDownloadService.ModelExists(settings.Audio.ModelPath)
+            ? "Model ready"
+            : "Download Model";
+
         WeakReferenceMessenger.Default.Register<RegionSelectedMessage>(this);
         WeakReferenceMessenger.Default.Register<WindowSelectedMessage>(this);
     }
@@ -170,6 +209,33 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     {
         var provider = CliProviderRegistry.GetActiveProvider();
         SystemPrompt = provider.DefaultSystemPrompt;
+    }
+
+    [RelayCommand]
+    private void ResetAudioPrompt()
+    {
+        AudioSystemPrompt = new AudioSettings().SystemPrompt;
+    }
+
+    [RelayCommand]
+    private async Task DownloadModel()
+    {
+        var modelPath = settings.Audio.ModelPath;
+        if (ModelDownloadService.ModelExists(modelPath))
+        {
+            DownloadModelButtonText = "Model already exists";
+            return;
+        }
+
+        IsModelDownloading = true;
+        DownloadModelButtonText = "Downloading...";
+        WeakReferenceMessenger.Default.Send(new ModelDownloadRequestedMessage(modelPath));
+    }
+
+    public void OnDownloadCompleted(bool success)
+    {
+        IsModelDownloading = false;
+        DownloadModelButtonText = success ? "Downloaded" : "Download Model";
     }
 
     private void ScheduleSave()

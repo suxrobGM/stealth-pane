@@ -4,11 +4,11 @@ using StealthPane.Terminal;
 
 namespace StealthPane.Services;
 
-public static class CaptureInjectorService
+public sealed class CaptureInjectorService(PtyService pty)
 {
     private static readonly byte[] Enter = "\r"u8.ToArray();
 
-    public static void CaptureAndInject(PtyService pty, CliProviderConfig provider, CaptureSettings settings)
+    public void CaptureAndInject(CliProviderConfig provider, CaptureSettings settings)
     {
         var imagePath = ScreenCaptureService.Capture(settings)
             .Replace('\\', '/');

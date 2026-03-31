@@ -2,6 +2,9 @@ namespace StealthPane.Services;
 
 public static class CleanupService
 {
+    /// <summary>
+    /// Cleans up old screenshot and audio capture files from previous sessions to free up disk space.
+    /// </summary>
     public static void CleanupOldCaptures()
     {
         var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");

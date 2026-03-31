@@ -78,6 +78,22 @@
         <TextBlock DockPanel.Dock="Left" FontSize="10" Foreground="{StaticResource MutedFg}"
                    VerticalAlignment="Center"
                    Text="{Binding CaptureHotkeyText}" />
+        <!-- Audio: show hotkey when model ready, REC when recording, download status otherwise -->
+        <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource MutedFg}"
+                   Text="{Binding AudioHotkeyText}"
+                   IsVisible="{Binding IsModelAvailable}" />
+        <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource AccentBrush}"
+                   Text="&#x23FA; REC"
+                   IsVisible="{Binding IsRecording}" />
+        <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource WarningFg}"
+                   Text="{Binding ModelStatusText}"
+                   IsVisible="{Binding ModelStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         <TextBlock DockPanel.Dock="Right" FontSize="10"
                    Foreground="{StaticResource MutedFg}" VerticalAlignment="Center"
                    HorizontalAlignment="Right"

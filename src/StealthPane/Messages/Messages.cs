@@ -18,6 +18,12 @@ public sealed record HotkeyChangedMessage(string Name, string Hotkey);
 public sealed record RequestRegionSelectionMessage;
 public sealed record RequestWindowSelectionMessage;
 
+// MainWindowViewModel -> View: recording state changed
+public sealed record AudioRecordingChangedMessage(bool IsRecording);
+
+// SettingsViewModel -> MainWindowViewModel: request model download
+public sealed record ModelDownloadRequestedMessage(string ModelPath);
+
 // MainWindow -> SettingsViewModel: dialog results
 public sealed record RegionSelectedMessage(int X, int Y, int Width, int Height);
 public sealed record WindowSelectedMessage(nint Handle, string Title);

@@ -57,14 +57,7 @@ public sealed partial class MainWindow : Window,
 
     public void Receive(ApplyOpacityMessage message)
     {
-        if (OperatingSystem.IsWindows())
-        {
-            WindowOpacityUtils.Apply(this, message.Opacity);
-        }
-        else
-        {
-            Opacity = message.Opacity;
-        }
+        WindowOpacityUtils.Apply(this, message.Opacity);
     }
 
     public async void Receive(RequestRegionSelectionMessage message)

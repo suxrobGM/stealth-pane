@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using StealthPane.Models;
 using StealthPane.Terminal;
@@ -17,14 +16,7 @@ public static partial class ScreenCaptureService
         Directory.CreateDirectory(tempDir);
         var filePath = Path.Combine(tempDir, $"capture_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.png");
 
-        if (OperatingSystem.IsWindows())
-        {
-            CaptureWindows(filePath, settings);
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            CaptureMacOs(filePath, settings);
-        }
+        CaptureWindows(filePath, settings);
 
         return filePath;
     }
@@ -124,20 +116,7 @@ public static partial class ScreenCaptureService
         PngWriter.Write(filePath, width, height, pixels);
     }
 
-    private static void CaptureMacOs(string filePath, CaptureSettings settings)
-    {
-        var args = settings.Mode switch
-        {
-            CaptureMode.Region when settings.RegionWidth > 0 =>
-                $"-R{settings.RegionX},{settings.RegionY},{settings.RegionWidth},{settings.RegionHeight} -x {filePath}",
-            _ => $"-x {filePath}"
-        };
-
-        var process = Process.Start("screencapture", args);
-        process?.WaitForExit(5000);
-    }
-
-    #region Platform API Constants and Imports
+    #region Win32 API Constants and Imports
 
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;

@@ -45,11 +45,6 @@ public sealed class PtyService : IDisposable
             return new WinPtyProvider();
         }
 
-        if (OperatingSystem.IsMacOS())
-        {
-            return new MacOsPtyProvider();
-        }
-
-        throw new PlatformNotSupportedException("Only Windows and macOS are supported");
+        throw new PlatformNotSupportedException("Only Windows is supported");
     }
 }

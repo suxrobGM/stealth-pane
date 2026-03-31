@@ -11,8 +11,8 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     IRecipient<RegionSelectedMessage>,
     IRecipient<WindowSelectedMessage>
 {
-    private AppSettings settings = SettingsService.Load();
     private Timer? saveTimer;
+    private AppSettings settings = SettingsService.Load();
 
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
@@ -52,6 +52,24 @@ public sealed partial class SettingsViewModel : ViewModelBase,
 
     [ObservableProperty]
     public partial string SelectedWindowTitle { get; set; } = "";
+
+    public void Receive(RegionSelectedMessage message)
+    {
+        settings.Capture.RegionX = message.X;
+        settings.Capture.RegionY = message.Y;
+        settings.Capture.RegionWidth = message.Width;
+        settings.Capture.RegionHeight = message.Height;
+        RegionDisplayText = $"{message.Width}\u00D7{message.Height} at ({message.X}, {message.Y})";
+        ScheduleSave();
+    }
+
+    public void Receive(WindowSelectedMessage message)
+    {
+        settings.Capture.WindowHandle = message.Handle;
+        settings.Capture.WindowTitle = message.Title;
+        SelectedWindowTitle = message.Title;
+        ScheduleSave();
+    }
 
     partial void OnSelectedProviderIndexChanged(int value)
     {
@@ -112,24 +130,6 @@ public sealed partial class SettingsViewModel : ViewModelBase,
         WeakReferenceMessenger.Default.Send(new RequestWindowSelectionMessage());
     }
 
-    public void Receive(RegionSelectedMessage message)
-    {
-        settings.Capture.RegionX = message.X;
-        settings.Capture.RegionY = message.Y;
-        settings.Capture.RegionWidth = message.Width;
-        settings.Capture.RegionHeight = message.Height;
-        RegionDisplayText = $"{message.Width}\u00D7{message.Height} at ({message.X}, {message.Y})";
-        ScheduleSave();
-    }
-
-    public void Receive(WindowSelectedMessage message)
-    {
-        settings.Capture.WindowHandle = message.Handle;
-        settings.Capture.WindowTitle = message.Title;
-        SelectedWindowTitle = message.Title;
-        ScheduleSave();
-    }
-
     public void Load(AppSettings settings)
     {
         this.settings = settings;
@@ -154,7 +154,8 @@ public sealed partial class SettingsViewModel : ViewModelBase,
 
         if (settings.Capture is { RegionWidth: > 0, RegionHeight: > 0 })
         {
-            RegionDisplayText = $"{settings.Capture.RegionWidth}\u00D7{settings.Capture.RegionHeight} at ({settings.Capture.RegionX}, {settings.Capture.RegionY})";
+            RegionDisplayText =
+                $"{settings.Capture.RegionWidth}\u00D7{settings.Capture.RegionHeight} at ({settings.Capture.RegionX}, {settings.Capture.RegionY})";
         }
         else
         {

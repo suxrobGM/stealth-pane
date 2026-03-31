@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using StealthPane.Services;
 using StealthPane.ViewModels;
 
@@ -10,8 +11,6 @@ public partial class WindowPickerWindow : Window
 {
     private readonly WindowPickerViewModel viewModel;
 
-    public WindowPickerWindow() : this([]) { }
-
     public WindowPickerWindow(List<WindowInfo> windows)
     {
         viewModel = new WindowPickerViewModel(windows);
@@ -20,11 +19,14 @@ public partial class WindowPickerWindow : Window
         InitializeComponent();
 
         viewModel.ResultTask.ContinueWith(_ =>
-            Avalonia.Threading.Dispatcher.UIThread.Post(Close),
+                Dispatcher.UIThread.Post(Close),
             TaskContinuationOptions.ExecuteSynchronously);
     }
 
-    public Task<WindowInfo?> GetSelectionAsync() => viewModel.ResultTask;
+    public Task<WindowInfo?> GetSelectionAsync()
+    {
+        return viewModel.ResultTask;
+    }
 
     private void OnListDoubleTapped(object? sender, TappedEventArgs e)
     {

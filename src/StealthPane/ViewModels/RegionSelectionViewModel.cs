@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-
 namespace StealthPane.ViewModels;
 
 public sealed partial class RegionSelectionViewModel : ViewModelBase

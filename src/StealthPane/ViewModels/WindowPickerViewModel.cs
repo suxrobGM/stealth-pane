@@ -4,9 +4,9 @@ using StealthPane.Services;
 
 namespace StealthPane.ViewModels;
 
+// ReSharper disable once PartialTypeWithSinglePart
 public sealed partial class WindowPickerViewModel(List<WindowInfo> windows) : ViewModelBase
 {
-    private readonly List<WindowInfo> windows = windows;
     private readonly TaskCompletionSource<WindowInfo?> tcs = new();
 
     [ObservableProperty]

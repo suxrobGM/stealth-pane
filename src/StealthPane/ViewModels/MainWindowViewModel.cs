@@ -15,11 +15,30 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<SettingsProviderChangedMessage>,
     IRecipient<HotkeyChangedMessage>
 {
-    private readonly SettingsViewModel settingsViewModel;
     private readonly CleanupService cleanupService;
     private readonly HotkeyService hotkeyService;
-    private bool initialized;
+    private readonly SettingsViewModel settingsViewModel;
     private IntPtr hwnd;
+    private bool initialized;
+
+    public MainWindowViewModel(
+        PtyService ptyService,
+        SettingsViewModel settingsViewModel,
+        CleanupService cleanupService,
+        HotkeyService hotkeyService)
+    {
+        this.settingsViewModel = settingsViewModel;
+        this.cleanupService = cleanupService;
+        this.hotkeyService = hotkeyService;
+        PtyService = ptyService;
+        Settings = SettingsService.Load();
+
+        LoadFromSettings();
+
+        WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<HotkeyChangedMessage>(this);
+    }
 
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
@@ -48,29 +67,46 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
-    public MainWindowViewModel(
-        PtyService ptyService,
-        SettingsViewModel settingsViewModel,
-        CleanupService cleanupService,
-        HotkeyService hotkeyService)
-    {
-        this.settingsViewModel = settingsViewModel;
-        this.cleanupService = cleanupService;
-        this.hotkeyService = hotkeyService;
-        PtyService = ptyService;
-        Settings = SettingsService.Load();
-
-        LoadFromSettings();
-
-        WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
-        WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
-        WeakReferenceMessenger.Default.Register<HotkeyChangedMessage>(this);
-    }
-
-    public AppSettings Settings { get; private set; }
+    public AppSettings Settings { get; }
     public PtyService PtyService { get; }
 
-    public static CliProviderConfig GetActiveProvider() => CliProviderRegistry.GetActiveProvider();
+    public void Receive(HotkeyChangedMessage message)
+    {
+        if (message.Name == "capture")
+        {
+            CaptureHotkeyText = $"\u2328 {message.Hotkey}";
+            if (hwnd != IntPtr.Zero)
+            {
+                hotkeyService.Register("capture", message.Hotkey, hwnd, CaptureScreen);
+            }
+        }
+        else if (message.Name == "opacity")
+        {
+            if (hwnd != IntPtr.Zero)
+            {
+                hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
+            }
+        }
+    }
+
+    public void Receive(OpacityChangedMessage message)
+    {
+        WindowOpacity = message.Opacity;
+    }
+
+    public void Receive(SettingsProviderChangedMessage message)
+    {
+        var providers = CliProviderRegistry.GetAllProviders();
+        if (message.Index >= 0 && message.Index < providers.Count)
+        {
+            SelectedProviderIndex = message.Index;
+        }
+    }
+
+    public static CliProviderConfig GetActiveProvider()
+    {
+        return CliProviderRegistry.GetActiveProvider();
+    }
 
     public void CaptureScreen()
     {
@@ -138,45 +174,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         WindowOpacity = next;
     }
 
-    public void Receive(OpacityChangedMessage message)
-    {
-        WindowOpacity = message.Opacity;
-    }
-
-    public void Receive(SettingsProviderChangedMessage message)
-    {
-        var providers = CliProviderRegistry.GetAllProviders();
-        if (message.Index >= 0 && message.Index < providers.Count)
-        {
-            SelectedProviderIndex = message.Index;
-        }
-    }
-
-    public void Receive(HotkeyChangedMessage message)
-    {
-        if (message.Name == "capture")
-        {
-            CaptureHotkeyText = $"\u2328 {message.Hotkey}";
-            if (hwnd != IntPtr.Zero)
-            {
-                hotkeyService.Register("capture", message.Hotkey, hwnd, CaptureScreen);
-            }
-        }
-        else if (message.Name == "opacity")
-        {
-            if (hwnd != IntPtr.Zero)
-            {
-                hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
-            }
-        }
-    }
-
     partial void OnSelectedProviderIndexChanged(int value)
     {
-        if (value < 0) return;
+        if (value < 0)
+        {
+            return;
+        }
 
         var providers = CliProviderRegistry.GetAllProviders();
-        if (value >= providers.Count) return;
+        if (value >= providers.Count)
+        {
+            return;
+        }
 
         var provider = providers[value];
         Settings.ActiveProviderId = provider.Id;

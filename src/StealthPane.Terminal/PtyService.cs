@@ -42,7 +42,7 @@ public sealed class PtyService : IDisposable
     {
         if (OperatingSystem.IsWindows())
         {
-            return new WindowsPtyProvider();
+            return new WinPtyProvider();
         }
 
         if (OperatingSystem.IsMacOS())

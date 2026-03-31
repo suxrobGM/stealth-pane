@@ -15,4 +15,8 @@
     <EmbeddedResource Include="Assets\xterm-addon-fit.min.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Quick.PtyNet" Version="1.0.4" />
+  </ItemGroup>
+
 </Project>

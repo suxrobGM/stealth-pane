@@ -144,7 +144,7 @@ public sealed class MacOsPtyProvider : IPtyProvider
         }
     }
 
-    // --- P/Invoke declarations ---
+    #region Platform API Constants and Imports
 
     private const ulong TIOCSWINSZ = 0x80087467;
 
@@ -186,4 +186,6 @@ public sealed class MacOsPtyProvider : IPtyProvider
 
     [DllImport("libSystem.dylib", SetLastError = true)]
     private static extern int kill(int pid, int sig);
+
+    #endregion
 }

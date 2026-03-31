@@ -38,6 +38,8 @@ public partial class App : Application
         services.AddAudioCapture();
 
         // App services
+        services.AddSingleton<SettingsService>();
+        services.AddSingleton<CliProviderRegistry>();
         services.AddSingleton<HotkeyService>();
         services.AddSingleton<CaptureInjectorService>();
         services.AddSingleton<AudioInjectorService>();

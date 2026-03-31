@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using StealthPane.Audio.Services;
 using StealthPane.Messages;
-using StealthPane.Models;
 using StealthPane.ScreenCapture.Models;
 using StealthPane.ScreenCapture.Services;
 using StealthPane.Services;
@@ -19,10 +18,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<HotkeyChangedMessage>,
     IRecipient<ModelDownloadRequestedMessage>
 {
-    private readonly HotkeyService hotkeyService;
     private readonly AudioInjectorService audioInjectorService;
     private readonly CaptureInjectorService captureInjectorService;
+    private readonly HotkeyService hotkeyService;
     private readonly ModelDownloadService modelDownloadService;
+    private readonly CliProviderRegistry providerRegistry;
+    private readonly SettingsService settingsService;
     private readonly SettingsViewModel settingsViewModel;
     private IntPtr hwnd;
     private bool initialized;
@@ -30,19 +31,22 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     public MainWindowViewModel(
         PtyService ptyService,
+        SettingsService settingsService,
+        CliProviderRegistry providerRegistry,
         SettingsViewModel settingsViewModel,
         HotkeyService hotkeyService,
         AudioInjectorService audioInjectorService,
         CaptureInjectorService captureInjectorService,
         ModelDownloadService modelDownloadService)
     {
+        this.settingsService = settingsService;
+        this.providerRegistry = providerRegistry;
         this.settingsViewModel = settingsViewModel;
         this.hotkeyService = hotkeyService;
         this.audioInjectorService = audioInjectorService;
         this.captureInjectorService = captureInjectorService;
         this.modelDownloadService = modelDownloadService;
         PtyService = ptyService;
-        Settings = SettingsService.Load();
 
         LoadFromSettings();
 
@@ -94,7 +98,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
 
-    public AppSettings Settings { get; }
     public PtyService PtyService { get; }
 
     public void Receive(HotkeyChangedMessage message)
@@ -137,16 +140,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     public void Receive(SettingsProviderChangedMessage message)
     {
-        var providers = CliProviderRegistry.GetAllProviders();
+        var providers = providerRegistry.GetAllProviders();
         if (message.Index >= 0 && message.Index < providers.Count)
         {
             SelectedProviderIndex = message.Index;
         }
     }
 
-    public static CliProviderConfig GetActiveProvider()
+    public CliProviderConfig GetActiveProvider()
     {
-        return CliProviderRegistry.GetActiveProvider();
+        return providerRegistry.GetActiveProvider();
     }
 
     public void CaptureScreen()
@@ -157,7 +160,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return;
         }
 
-        captureInjectorService.CaptureAndInject(provider, Settings.Capture);
+        captureInjectorService.CaptureAndInject();
     }
 
     public void ToggleAudioRecording()
@@ -169,14 +172,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         }
 
         var wasRecording = IsRecording;
-        var started = audioInjectorService.Toggle(Settings.Audio, isRec =>
+        var started = audioInjectorService.Toggle(isRec =>
         {
             IsRecording = isRec;
             ModelStatusText = "";
             WeakReferenceMessenger.Default.Send(new AudioRecordingChangedMessage(isRec));
         });
 
-        // Only show error if we tried to start (not stop) and it failed
         if (!started && !wasRecording)
         {
             ModelStatusText = audioInjectorService.LastError ?? "Audio capture failed";
@@ -203,7 +205,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return false;
         }
 
-        var modelPath = Settings.Audio.ModelPath;
+        var modelPath = settingsService.Settings.Audio.ModelPath;
         var modelFileName = Path.GetFileName(modelPath);
 
         IsModelDownloading = true;
@@ -275,7 +277,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return;
         }
 
-        settingsViewModel.Load(Settings);
+        settingsViewModel.Load();
         SettingsContent = settingsViewModel;
         IsSettingsVisible = true;
     }
@@ -304,15 +306,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return;
         }
 
-        var providers = CliProviderRegistry.GetAllProviders();
+        var providers = providerRegistry.GetAllProviders();
         if (value >= providers.Count)
         {
             return;
         }
 
         var provider = providers[value];
-        Settings.ActiveProviderId = provider.Id;
-        SettingsService.Save(Settings);
+        settingsService.Settings.ActiveProviderId = provider.Id;
+        settingsService.Save();
 
         if (initialized)
         {
@@ -324,8 +326,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     partial void OnIsAlwaysOnTopChanged(bool value)
     {
-        Settings.AlwaysOnTop = value;
-        SettingsService.Save(Settings);
+        settingsService.Settings.AlwaysOnTop = value;
+        settingsService.Save();
         PinForeground = value
             ? (IBrush)Application.Current!.Resources["AccentBrush"]!
             : (IBrush)Application.Current!.Resources["SecondaryFg"]!;
@@ -333,7 +335,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     partial void OnWindowOpacityChanged(double value)
     {
-        Settings.WindowOpacity = value;
+        settingsService.Settings.WindowOpacity = value;
         OpacityText = $"\u25D0 {(int)(value * 100)}%";
 
         if (initialized)
@@ -349,8 +351,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
             return;
         }
 
-        hotkeyService.Register("capture", Settings.Capture.Hotkey, hwnd, CaptureScreen);
-        hotkeyService.Register("opacity", Settings.OpacityHotkey, hwnd, CycleOpacity);
+        var settings = settingsService.Settings;
+        hotkeyService.Register("capture", settings.Capture.Hotkey, hwnd, CaptureScreen);
+        hotkeyService.Register("opacity", settings.OpacityHotkey, hwnd, CycleOpacity);
 
         if (IsModelAvailable)
         {
@@ -362,13 +365,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     {
         if (hwnd != IntPtr.Zero)
         {
-            hotkeyService.Register("audio", Settings.Audio.Hotkey, hwnd, ToggleAudioRecording);
+            hotkeyService.Register("audio", settingsService.Settings.Audio.Hotkey, hwnd, ToggleAudioRecording);
         }
     }
 
     private void CheckModelAvailability()
     {
-        IsModelAvailable = ModelDownloadService.ModelExists(Settings.Audio.ModelPath);
+        IsModelAvailable = ModelDownloadService.ModelExists(settingsService.Settings.Audio.ModelPath);
         if (!IsModelAvailable)
         {
             ModelStatusText = "Whisper model not found, please download by clicking the button in settings";
@@ -377,17 +380,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     private void LoadFromSettings()
     {
-        var providers = CliProviderRegistry.GetAllProviders();
+        var settings = settingsService.Settings;
+        var providers = providerRegistry.GetAllProviders();
         ProviderNames = providers.Select(p => p.Name).ToList();
 
-        var activeProvider = CliProviderRegistry.GetActiveProvider();
+        var activeProvider = providerRegistry.GetActiveProvider();
         var index = providers.ToList().FindIndex(p => p.Id == activeProvider.Id);
         SelectedProviderIndex = index >= 0 ? index : 0;
 
-        IsAlwaysOnTop = Settings.AlwaysOnTop;
-        WindowOpacity = Settings.WindowOpacity;
-        CaptureHotkeyText = $"\u2328 {Settings.Capture.Hotkey}";
-        AudioHotkeyText = $"\u23FA {Settings.Audio.Hotkey}";
+        IsAlwaysOnTop = settings.AlwaysOnTop;
+        WindowOpacity = settings.WindowOpacity;
+        CaptureHotkeyText = $"\u2328 {settings.Capture.Hotkey}";
+        AudioHotkeyText = $"\u23FA {settings.Audio.Hotkey}";
         PinForeground = IsAlwaysOnTop
             ? (IBrush)Application.Current!.Resources["AccentBrush"]!
             : (IBrush)Application.Current!.Resources["SecondaryFg"]!;

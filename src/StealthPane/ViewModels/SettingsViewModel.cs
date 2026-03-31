@@ -4,19 +4,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using StealthPane.Audio.Models;
 using StealthPane.Audio.Services;
 using StealthPane.Messages;
-using StealthPane.Models;
 using StealthPane.ScreenCapture.Models;
 using StealthPane.Services;
 
 namespace StealthPane.ViewModels;
 
-public sealed partial class SettingsViewModel : ViewModelBase,
+public sealed partial class SettingsViewModel(SettingsService settingsService, CliProviderRegistry providerRegistry) : ViewModelBase,
     IRecipient<RegionSelectedMessage>,
     IRecipient<WindowSelectedMessage>
 {
-    private Timer? saveTimer;
-    private AppSettings settings = SettingsService.Load();
-
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
 
@@ -70,20 +66,21 @@ public sealed partial class SettingsViewModel : ViewModelBase,
 
     public void Receive(RegionSelectedMessage message)
     {
-        settings.Capture.RegionX = message.X;
-        settings.Capture.RegionY = message.Y;
-        settings.Capture.RegionWidth = message.Width;
-        settings.Capture.RegionHeight = message.Height;
+        var capture = settingsService.Settings.Capture;
+        capture.RegionX = message.X;
+        capture.RegionY = message.Y;
+        capture.RegionWidth = message.Width;
+        capture.RegionHeight = message.Height;
         RegionDisplayText = $"{message.Width}\u00D7{message.Height} at ({message.X}, {message.Y})";
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     public void Receive(WindowSelectedMessage message)
     {
-        settings.Capture.WindowHandle = message.Handle;
-        settings.Capture.WindowTitle = message.Title;
+        settingsService.Settings.Capture.WindowHandle = message.Handle;
+        settingsService.Settings.Capture.WindowTitle = message.Title;
         SelectedWindowTitle = message.Title;
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnSelectedProviderIndexChanged(int value)
@@ -93,57 +90,57 @@ public sealed partial class SettingsViewModel : ViewModelBase,
 
     partial void OnOpacityChanged(double value)
     {
-        settings.WindowOpacity = value;
+        settingsService.Settings.WindowOpacity = value;
         OpacityValueText = $"{(int)(value * 100)}%";
         WeakReferenceMessenger.Default.Send(new OpacityChangedMessage(value));
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnSelectedCaptureModeIndexChanged(int value)
     {
-        settings.Capture.Mode = (CaptureMode)value;
+        settingsService.Settings.Capture.Mode = (CaptureMode)value;
         IsRegionMode = value == (int)CaptureMode.Region;
         IsWindowMode = value == (int)CaptureMode.Window;
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnHotkeyChanged(string value)
     {
-        settings.Capture.Hotkey = value;
+        settingsService.Settings.Capture.Hotkey = value;
         WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("capture", value));
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnOpacityHotkeyChanged(string value)
     {
-        settings.OpacityHotkey = value;
+        settingsService.Settings.OpacityHotkey = value;
         WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("opacity", value));
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnSystemPromptChanged(string value)
     {
-        settings.Capture.SystemPrompt = value;
-        ScheduleSave();
+        settingsService.Settings.Capture.SystemPrompt = value;
+        settingsService.SaveDebounced();
     }
 
     partial void OnAudioHotkeyChanged(string value)
     {
-        settings.Audio.Hotkey = value;
+        settingsService.Settings.Audio.Hotkey = value;
         WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("audio", value));
-        ScheduleSave();
+        settingsService.SaveDebounced();
     }
 
     partial void OnAudioModelPathChanged(string value)
     {
-        settings.Audio.ModelPath = value;
-        ScheduleSave();
+        settingsService.Settings.Audio.ModelPath = value;
+        settingsService.SaveDebounced();
     }
 
     partial void OnAudioSystemPromptChanged(string value)
     {
-        settings.Audio.SystemPrompt = value;
-        ScheduleSave();
+        settingsService.Settings.Audio.SystemPrompt = value;
+        settingsService.SaveDebounced();
     }
 
     [RelayCommand]
@@ -158,11 +155,11 @@ public sealed partial class SettingsViewModel : ViewModelBase,
         WeakReferenceMessenger.Default.Send(new RequestWindowSelectionMessage());
     }
 
-    public void Load(AppSettings settings)
+    public void Load()
     {
-        this.settings = settings;
+        var settings = settingsService.Settings;
 
-        var providers = CliProviderRegistry.GetAllProviders();
+        var providers = providerRegistry.GetAllProviders();
         ProviderNames = [.. providers.Select(p => p.Name)];
 
         var index = providers.ToList().FindIndex(p => p.Id == settings.ActiveProviderId);
@@ -210,7 +207,7 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     [RelayCommand]
     private void ResetPrompt()
     {
-        var provider = CliProviderRegistry.GetActiveProvider();
+        var provider = providerRegistry.GetActiveProvider();
         SystemPrompt = provider.DefaultSystemPrompt;
     }
 
@@ -223,7 +220,7 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     [RelayCommand]
     private async Task DownloadModel()
     {
-        var modelPath = settings.Audio.ModelPath;
+        var modelPath = settingsService.Settings.Audio.ModelPath;
         if (ModelDownloadService.ModelExists(modelPath))
         {
             DownloadModelButtonText = "Model already exists";
@@ -239,16 +236,5 @@ public sealed partial class SettingsViewModel : ViewModelBase,
     {
         IsModelDownloading = false;
         DownloadModelButtonText = success ? "Downloaded" : "Download Model";
-    }
-
-    private void ScheduleSave()
-    {
-        saveTimer?.Dispose();
-        saveTimer = new Timer(_ =>
-        {
-            SettingsService.Save(settings);
-            saveTimer?.Dispose();
-            saveTimer = null;
-        }, null, 500, Timeout.Infinite);
     }
 }

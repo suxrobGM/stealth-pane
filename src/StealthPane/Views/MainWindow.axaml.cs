@@ -90,7 +90,7 @@ public sealed partial class MainWindow : Window,
 
         Terminal.Initialize(viewModel.PtyService);
 
-        var provider = MainWindowViewModel.GetActiveProvider();
+        var provider = viewModel.GetActiveProvider();
         Terminal.StartProcess(provider.Command, provider.Args, Environment.CurrentDirectory);
 
         var hwnd = TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;

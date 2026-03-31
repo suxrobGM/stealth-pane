@@ -10,11 +10,33 @@ namespace StealthPane.Services;
 [JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 internal sealed partial class AppSettingsJsonContext : JsonSerializerContext;
 
-public static class SettingsService
+public sealed class SettingsService
 {
     private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
+    private Timer? saveTimer;
 
-    public static AppSettings Load()
+    public AppSettings Settings { get; } = Load();
+
+    public void Save()
+    {
+        var json = JsonSerializer.Serialize(Settings, AppSettingsJsonContext.Default.AppSettings);
+        var tempPath = SettingsPath + ".tmp";
+        File.WriteAllText(tempPath, json);
+        File.Move(tempPath, SettingsPath, true);
+    }
+
+    public void SaveDebounced()
+    {
+        saveTimer?.Dispose();
+        saveTimer = new Timer(_ =>
+        {
+            Save();
+            saveTimer?.Dispose();
+            saveTimer = null;
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private static AppSettings Load()
     {
         if (!File.Exists(SettingsPath))
         {
@@ -31,13 +53,5 @@ public static class SettingsService
         {
             return new AppSettings();
         }
-    }
-
-    public static void Save(AppSettings settings)
-    {
-        var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
-        var tempPath = SettingsPath + ".tmp";
-        File.WriteAllText(tempPath, json);
-        File.Move(tempPath, SettingsPath, true);
     }
 }

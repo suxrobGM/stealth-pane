@@ -99,6 +99,7 @@ All hotkeys are customizable in the settings panel.
 
 - [How It Works](docs/how-it-works.md) - screen protection, terminal emulator, capture pipeline, and more
 - [Architecture](docs/architecture.md) - project structure, conventions, and build details
+- [Changelog](CHANGELOG.md) - release history and notable changes
 
 ## License
 

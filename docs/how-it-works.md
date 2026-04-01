@@ -19,7 +19,7 @@ This means tools like OBS, Zoom screen share, Windows Snipping Tool, and `PrintS
 
 The terminal is a full **xterm.js** instance running inside a **WebView2** (Chromium) control, connected to a real Windows PTY (pseudo-terminal).
 
-```
+```text
 User types → xterm.js → JSON message → WebView2 bridge → C# → PTY stdin
 PTY stdout → C# → base64 encode → WebView2 bridge → xterm.js renders
 ```
@@ -99,7 +99,7 @@ Stealth Code ships as a single `stealthcode.exe` — a lightweight AOT-compiled 
 **On first run:**
 
 1. The launcher iterates its embedded manifest resources (the main app, xterm.js assets, Whisper runtime, etc.)
-2. Each resource is GZip-decompressed and written to a `stealthcode_bin/` subdirectory
+2. Each resource is GZip-decompressed and written to a `stealthcode_app/` subdirectory
 3. The main `StealthCode.exe` is launched from the extracted directory
 4. The launcher waits for the app to exit and returns its exit code
 

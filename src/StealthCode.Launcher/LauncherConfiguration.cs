@@ -8,7 +8,7 @@ internal static class LauncherConfiguration
     /// <summary>
     ///     Directory where the main application will be extracted.
     /// </summary>
-    public const string ExtractionDirectory = "stealthcode_bin";
+    public const string ExtractionDirectory = "stealthcode_app";
 
     /// <summary>
     ///     Name of the main executable.

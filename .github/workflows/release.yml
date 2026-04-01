@@ -46,8 +46,18 @@ jobs:
         run: |
           Compress-Archive -Path "publish/win-x64/stealthcode.exe" -DestinationPath "publish/StealthCode-${{ steps.version.outputs.VERSION }}-win-x64.zip"
 
+      - name: Extract changelog for current version
+        id: changelog
+        shell: bash
+        run: |
+          version="${{ steps.version.outputs.VERSION }}"
+          # Extract the section for the current version (between its heading and the next ## heading)
+          changelog=$(awk "/^## \\[${version}\\]/{found=1; next} /^## \\[/{if(found) exit} found{print}" CHANGELOG.md)
+          # Write to file to preserve newlines
+          echo "$changelog" > release_notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body_path: release_notes.md
           files: publish/StealthCode-${{ steps.version.outputs.VERSION }}-win-x64.zip

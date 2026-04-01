@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using StealthCode.Updater.Models;
 
@@ -66,7 +67,7 @@ public sealed class UpdateService : IDisposable
             return;
         }
 
-        var startInfo = new System.Diagnostics.ProcessStartInfo
+        var startInfo = new ProcessStartInfo
         {
             FileName = "cmd.exe",
             Arguments = $"/c \"{UpdateScriptPath}\"",
@@ -75,7 +76,7 @@ public sealed class UpdateService : IDisposable
             WorkingDirectory = LauncherDir
         };
 
-        System.Diagnostics.Process.Start(startInfo);
+        Process.Start(startInfo);
         Environment.Exit(0);
     }
 

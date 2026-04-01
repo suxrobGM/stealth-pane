@@ -35,6 +35,7 @@ src/
   StealthCode.Terminal/         # PTY library (winpty via Quick.PtyNet)
   StealthCode.ScreenCapture/    # Win32 screen capture (GDI BitBlt/PrintWindow, PngWriter)
   StealthCode.Audio/            # WASAPI loopback capture (NAudio) + Whisper.net transcription
+  StealthCode.Updater/          # GitHub release checker + self-update downloader
   StealthCode.Launcher/         # Self-extracting AOT launcher
 scripts/
   publish.ps1                   # Build + package pipeline

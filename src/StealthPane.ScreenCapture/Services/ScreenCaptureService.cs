@@ -54,7 +54,10 @@ public sealed partial class ScreenCaptureService
         GetWindowRect(windowHandle, out var rect);
         var width = rect.Right - rect.Left;
         var height = rect.Bottom - rect.Top;
-        if (width <= 0 || height <= 0) return;
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
 
         var hdcScreen = GetDC(IntPtr.Zero);
         try

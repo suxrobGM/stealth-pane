@@ -106,4 +106,4 @@ if (Test-Path $TempOutput) {
 }
 
 Write-Host ""
-Write-Host "Done: $FinalOutput\stealthpane_launcher.exe" -ForegroundColor Green
+Write-Host "Done: $FinalOutput\stealthpane.exe" -ForegroundColor Green

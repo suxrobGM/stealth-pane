@@ -8,7 +8,7 @@ internal static class LauncherConfiguration
     /// <summary>
     ///     Directory where the main application will be extracted.
     /// </summary>
-    public const string ExtractionDirectory = "stealthpane";
+    public const string ExtractionDirectory = "stealthpane_bin";
 
     /// <summary>
     ///     Name of the main executable.

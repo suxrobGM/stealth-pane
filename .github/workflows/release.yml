@@ -30,8 +30,8 @@ jobs:
         run: |
           $version = "${{ steps.version.outputs.VERSION }}"
           foreach ($proj in @(
-            "src/StealthPane/StealthPane.csproj",
-            "src/StealthPane.Launcher/StealthPane.Launcher.csproj"
+            "src/StealthCode/StealthCode.csproj",
+            "src/StealthCode.Launcher/StealthCode.Launcher.csproj"
           )) {
             (Get-Content $proj) -replace '<Version>.*</Version>', "<Version>$version</Version>" | Set-Content $proj
           }
@@ -44,10 +44,10 @@ jobs:
       - name: Create release archive
         shell: pwsh
         run: |
-          Compress-Archive -Path "publish/win-x64/stealthpane.exe" -DestinationPath "publish/StealthPane-${{ steps.version.outputs.VERSION }}-win-x64.zip"
+          Compress-Archive -Path "publish/win-x64/stealthcode.exe" -DestinationPath "publish/StealthCode-${{ steps.version.outputs.VERSION }}-win-x64.zip"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: publish/StealthPane-${{ steps.version.outputs.VERSION }}-win-x64.zip
+          files: publish/StealthCode-${{ steps.version.outputs.VERSION }}-win-x64.zip

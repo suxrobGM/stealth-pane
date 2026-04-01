@@ -11,9 +11,9 @@ $ErrorActionPreference = "Stop"
 
 # Paths
 $OutputDir = "..\publish"
-$MainProjectPath = "..\src\StealthPane\StealthPane.csproj"
-$LauncherProjectPath = "..\src\StealthPane.Launcher\StealthPane.Launcher.csproj"
-$EmbeddedDir = "..\src\StealthPane.Launcher\Embedded"
+$MainProjectPath = "..\src\StealthCode\StealthCode.csproj"
+$LauncherProjectPath = "..\src\StealthCode.Launcher\StealthCode.Launcher.csproj"
+$EmbeddedDir = "..\src\StealthCode.Launcher\Embedded"
 $TempOutput = "..\publish\temp"
 $FinalOutput = Join-Path $OutputDir $Runtime
 
@@ -106,4 +106,4 @@ if (Test-Path $TempOutput) {
 }
 
 Write-Host ""
-Write-Host "Done: $FinalOutput\stealthpane.exe" -ForegroundColor Green
+Write-Host "Done: $FinalOutput\stealthcode.exe" -ForegroundColor Green

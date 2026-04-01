@@ -20,7 +20,7 @@ jobs:
           dotnet-quality: "preview"
 
       - name: Restore
-        run: dotnet restore src/StealthPane/StealthPane.csproj
+        run: dotnet restore src/StealthCode/StealthCode.csproj
 
       - name: Build
-        run: dotnet build src/StealthPane/StealthPane.csproj -c Release --no-restore
+        run: dotnet build src/StealthCode/StealthCode.csproj -c Release --no-restore

@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="StealthCode.Controls.HotkeyTextBox">
+
+  <StackPanel Spacing="4">
+    <TextBox x:Name="Input" FontSize="11" Height="28"
+             Background="{StaticResource ControlBg}"
+             Foreground="{StaticResource PrimaryFg}"
+             BorderThickness="0" />
+    <TextBlock x:Name="ErrorText" FontSize="10" Foreground="#E05252"
+               IsVisible="False" />
+  </StackPanel>
+</UserControl>

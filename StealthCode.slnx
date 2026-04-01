@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/StealthCode.Launcher/StealthCode.Launcher.csproj" />
+  <Project Path="src/StealthCode.Terminal/StealthCode.Terminal.csproj" />
+  <Project Path="src/StealthCode.ScreenCapture/StealthCode.ScreenCapture.csproj" />
+  <Project Path="src/StealthCode.Audio/StealthCode.Audio.csproj" />
+  <Project Path="src/StealthCode.Updater/StealthCode.Updater.csproj" />
+  <Project Path="src/StealthCode/StealthCode.csproj" />
+</Solution>

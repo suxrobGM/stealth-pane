@@ -1,0 +1,15 @@
+using StealthCode.Audio.Models;
+using StealthCode.ScreenCapture.Models;
+
+namespace StealthCode.Models;
+
+public sealed record class AppSettings
+{
+    public string ActiveProviderId { get; set; } = "claude-code";
+    public double WindowOpacity { get; set; } = 1.0;
+    public bool AlwaysOnTop { get; set; }
+    public CaptureSettings Capture { get; set; } = new();
+    public string OpacityHotkey { get; set; } = "Ctrl+Shift+O";
+    public AudioSettings Audio { get; set; } = new();
+    public List<CliProviderConfig> CustomProviders { get; set; } = [];
+}

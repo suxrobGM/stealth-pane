@@ -1,12 +1,12 @@
-# StealthPane
+# StealthCode
 
 A Windows desktop app (Avalonia UI) that runs AI coding CLIs (Claude Code, Codex, Gemini CLI) in a secure, transparent, always-on-top terminal window invisible to screen capture.
 
 ## Build & Run
 
 ```bash
-dotnet build src/StealthPane/StealthPane.csproj
-dotnet run --project src/StealthPane/StealthPane.csproj
+dotnet build src/StealthCode/StealthCode.csproj
+dotnet run --project src/StealthCode/StealthCode.csproj
 ```
 
 Publish single executable (via Launcher):
@@ -31,11 +31,11 @@ No test projects exist yet.
 
 ```text
 src/
-  StealthPane/                  # Main UI app (composition root, MVVM, orchestrators)
-  StealthPane.Terminal/         # PTY library (winpty via Quick.PtyNet)
-  StealthPane.ScreenCapture/    # Win32 screen capture (GDI BitBlt/PrintWindow, PngWriter)
-  StealthPane.Audio/            # WASAPI loopback capture (NAudio) + Whisper.net transcription
-  StealthPane.Launcher/         # Self-extracting AOT launcher
+  StealthCode/                  # Main UI app (composition root, MVVM, orchestrators)
+  StealthCode.Terminal/         # PTY library (winpty via Quick.PtyNet)
+  StealthCode.ScreenCapture/    # Win32 screen capture (GDI BitBlt/PrintWindow, PngWriter)
+  StealthCode.Audio/            # WASAPI loopback capture (NAudio) + Whisper.net transcription
+  StealthCode.Launcher/         # Self-extracting AOT launcher
 scripts/
   publish.ps1                   # Build + package pipeline
 ```
@@ -50,7 +50,6 @@ Modules (Terminal, ScreenCapture, Audio) are independent — zero inter-module d
 - Win32 interop uses `[LibraryImport]` with `partial` static classes
 - All colors in `Themes/Theme.axaml`, all styles in `Themes/Styles.axaml`
 - Reusable XAML classes: `Button.chrome`, `Button.chrome.pinned`, `TextBlock.section-header`, `TextBlock.field-label`, `Border.divider`, `*.form-input`
-- Settings persisted to `%APPDATA%/StealthPane/settings.json` via `System.Text.Json` source gen
 - Code-behind kept minimal — only platform-specific ops
 - Content protection disabled in DEBUG builds
 

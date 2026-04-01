@@ -1,4 +1,4 @@
-# StealthPane
+# Stealth Code
 
 A Windows desktop app that runs AI coding CLIs in a secure, transparent, always-on-top terminal window **invisible to screen capture**.
 
@@ -28,11 +28,11 @@ Built with .NET 10 and Avalonia UI. Windows only.
 
 ```bash
 # Clone the repository
-git clone https://github.com/anthropics/stealth-pane.git
-cd stealth-pane
+git clone https://github.com/anthropics/stealth-code.git
+cd stealth-code
 
 # Build and run
-dotnet run --project src/StealthPane/StealthPane.csproj
+dotnet run --project src/StealthCode/StealthCode.csproj
 ```
 
 ## Publish
@@ -44,7 +44,7 @@ cd scripts
 .\publish.ps1
 ```
 
-This publishes the main app, GZip-compresses all files, embeds them into a lightweight AOT launcher, and outputs a single `stealthpane_launcher.exe` at `publish/win-x64/`. On first run, the launcher extracts the app to a local `stealthpane/` directory and launches it.
+This publishes the main app, GZip-compresses all files, embeds them into a lightweight AOT launcher, and outputs a single `stealthcode.exe` at `publish/win-x64/`. On first run, the launcher extracts the app to a local `stealthcode_bin/` directory and launches it.
 
 ## Usage
 
@@ -62,11 +62,11 @@ This publishes the main app, GZip-compresses all files, embeds them into a light
 
 ```
 src/
-  StealthPane/                Main UI app (Avalonia, MVVM)
-  StealthPane.Terminal/       PTY library (winpty)
-  StealthPane.ScreenCapture/  Screenshot capture module (Win32 GDI)
-  StealthPane.Audio/          Audio capture (NAudio WASAPI) + transcription (Whisper.net)
-  StealthPane.Launcher/       Self-extracting launcher (AOT single exe)
+  StealthCode/                Main UI app (Avalonia, MVVM)
+  StealthCode.Terminal/       PTY library (winpty)
+  StealthCode.ScreenCapture/  Screenshot capture module (Win32 GDI)
+  StealthCode.Audio/          Audio capture (NAudio WASAPI) + transcription (Whisper.net)
+  StealthCode.Launcher/       Self-extracting launcher (AOT single exe)
 scripts/
   publish.ps1                 Build + package pipeline
 ```

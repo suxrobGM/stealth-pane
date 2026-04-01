@@ -31,7 +31,8 @@ jobs:
           $version = "${{ steps.version.outputs.VERSION }}"
           foreach ($proj in @(
             "src/StealthCode/StealthCode.csproj",
-            "src/StealthCode.Launcher/StealthCode.Launcher.csproj"
+            "src/StealthCode.Launcher/StealthCode.Launcher.csproj",
+            "src/StealthCode.Updater/StealthCode.Updater.csproj"
           )) {
             (Get-Content $proj) -replace '<Version>.*</Version>', "<Version>$version</Version>" | Set-Content $proj
           }

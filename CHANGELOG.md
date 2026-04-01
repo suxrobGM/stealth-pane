@@ -2,6 +2,14 @@
 
 All notable changes to Stealth Code will be documented in this file.
 
+## [1.0.2] - 2026-04-01
+
+### Fixes
+
+- Fixed version display showing 1.0.0 after update - now reads version from the main app instead of the Updater DLL
+- App now checks for updates automatically on startup instead of requiring a manual check in settings
+- Added Updater project to release workflow version stamping
+
 ## [1.0.1] - 2026-04-01
 
 ### Improvements

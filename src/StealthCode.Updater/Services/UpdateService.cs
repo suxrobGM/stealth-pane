@@ -17,7 +17,8 @@ public sealed class UpdateService : IDisposable
     {
         get
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var version = Assembly.GetEntryAssembly()?.GetName().Version
+                          ?? Assembly.GetExecutingAssembly().GetName().Version;
             return version?.ToString(3) ?? "0.0.0";
         }
     }

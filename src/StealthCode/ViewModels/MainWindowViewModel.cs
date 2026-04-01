@@ -23,6 +23,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     private readonly CliProviderRegistry providerRegistry;
     private readonly SettingsService settingsService;
     private readonly SettingsViewModel settingsViewModel;
+    private readonly UpdateService updateService;
     private IntPtr hwnd;
     private bool initialized;
     private bool switching;
@@ -34,13 +35,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         SettingsViewModel settingsViewModel,
         HotkeyService hotkeyService,
         CaptureInjectorService captureInjectorService,
-        AudioViewModel audioViewModel)
+        AudioViewModel audioViewModel,
+        UpdateService updateService)
     {
         this.settingsService = settingsService;
         this.providerRegistry = providerRegistry;
         this.settingsViewModel = settingsViewModel;
         this.hotkeyService = hotkeyService;
         this.captureInjectorService = captureInjectorService;
+        this.updateService = updateService;
         PtyService = ptyService;
         Audio = audioViewModel;
 
@@ -143,6 +146,24 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         WeakReferenceMessenger.Default.Send(new ApplyOpacityMessage(WindowOpacity));
         Audio.Initialize(windowHandle, settingsViewModel);
         RegisterGlobalHotkeys();
+        _ = CheckForUpdateOnStartupAsync();
+    }
+
+    private async Task CheckForUpdateOnStartupAsync()
+    {
+        try
+        {
+            var release = await updateService.CheckForUpdateAsync();
+            if (release is not null)
+            {
+                IsUpdateAvailable = true;
+                WeakReferenceMessenger.Default.Send(new UpdateAvailableMessage(true));
+            }
+        }
+        catch
+        {
+            // Silently ignore startup update check failures
+        }
     }
 
     public void Cleanup()

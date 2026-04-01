@@ -3,5 +3,6 @@
   <Project Path="src/StealthPane.Terminal/StealthPane.Terminal.csproj" />
   <Project Path="src/StealthPane.ScreenCapture/StealthPane.ScreenCapture.csproj" />
   <Project Path="src/StealthPane.Audio/StealthPane.Audio.csproj" />
+  <Project Path="src/StealthPane.Updater/StealthPane.Updater.csproj" />
   <Project Path="src/StealthPane/StealthPane.csproj" />
 </Solution>

@@ -42,6 +42,7 @@
     <ProjectReference Include="..\StealthPane.Terminal\StealthPane.Terminal.csproj"/>
     <ProjectReference Include="..\StealthPane.ScreenCapture\StealthPane.ScreenCapture.csproj"/>
     <ProjectReference Include="..\StealthPane.Audio\StealthPane.Audio.csproj"/>
+    <ProjectReference Include="..\StealthPane.Updater\StealthPane.Updater.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -24,6 +24,9 @@ public sealed record AudioRecordingChangedMessage(bool IsRecording);
 // SettingsViewModel -> MainWindowViewModel: request model download
 public sealed record ModelDownloadRequestedMessage(string ModelPath);
 
+// Update notifications
+public sealed record UpdateAvailableMessage(bool Available);
+
 // MainWindow -> SettingsViewModel: dialog results
 public sealed record RegionSelectedMessage(int X, int Y, int Width, int Height);
 public sealed record WindowSelectedMessage(nint Handle, string Title);

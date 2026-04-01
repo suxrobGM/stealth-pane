@@ -16,13 +16,30 @@ internal static class ApplicationLauncher
     /// <returns>The exit code from the main application.</returns>
     public static int Launch(string[] args)
     {
+        // Clean up update script if it exists from a previous update
+        var updateScript = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "update.cmd");
+        if (File.Exists(updateScript))
+        {
+            try
+            {
+                File.Delete(updateScript);
+            }
+            catch
+            {
+                /* best effort */
+            }
+        }
+
         var mainExePath = Path.Combine(ExtractionDir, LauncherConfiguration.MainExecutableName);
 
-        // Check if extraction is needed
-        var needsExtraction = !Directory.Exists(ExtractionDir);
-
-        if (needsExtraction)
+        // Re-extract if directory is missing or main exe doesn't exist
+        if (!File.Exists(mainExePath))
         {
+            if (Directory.Exists(ExtractionDir))
+            {
+                Directory.Delete(ExtractionDir, true);
+            }
+
             PrepareApplication(ExtractionDir);
         }
 

@@ -8,13 +8,15 @@ using StealthPane.ScreenCapture.Models;
 using StealthPane.ScreenCapture.Utilities;
 using StealthPane.Services;
 using StealthPane.Terminal;
+using StealthPane.Updater.Services;
 
 namespace StealthPane.ViewModels;
 
 public sealed partial class MainWindowViewModel : ViewModelBase,
     IRecipient<OpacityChangedMessage>,
     IRecipient<SettingsProviderChangedMessage>,
-    IRecipient<HotkeyChangedMessage>
+    IRecipient<HotkeyChangedMessage>,
+    IRecipient<UpdateAvailableMessage>
 {
     private readonly CaptureInjectorService captureInjectorService;
     private readonly HotkeyService hotkeyService;
@@ -47,6 +49,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         WeakReferenceMessenger.Default.Register<OpacityChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<SettingsProviderChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<HotkeyChangedMessage>(this);
+        WeakReferenceMessenger.Default.Register<UpdateAvailableMessage>(this);
     }
 
     [ObservableProperty]
@@ -72,6 +75,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
     [ObservableProperty]
     public partial string CaptureHotkeyText { get; set; } = "\u2328 Ctrl+Shift+C";
+
+    public string VersionText { get; } = $"v{UpdateService.CurrentVersion}";
+
+    [ObservableProperty]
+    public partial bool IsUpdateAvailable { get; set; }
 
     [ObservableProperty]
     public partial IBrush PinForeground { get; set; } = Brushes.Transparent;
@@ -116,6 +124,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         }
     }
 
+    public void Receive(UpdateAvailableMessage message)
+    {
+        IsUpdateAvailable = message.Available;
+    }
+
     public void CaptureScreen()
     {
         captureInjectorService.CaptureAndInject();
@@ -150,6 +163,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     private void TogglePin()
     {
         IsAlwaysOnTop = !IsAlwaysOnTop;
+    }
+
+    [RelayCommand]
+    private void ShowUpdate()
+    {
+        if (!IsSettingsVisible)
+        {
+            ToggleSettings();
+        }
     }
 
     [RelayCommand]

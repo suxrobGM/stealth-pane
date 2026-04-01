@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -6,13 +7,20 @@ using StealthPane.Audio.Services;
 using StealthPane.Messages;
 using StealthPane.ScreenCapture.Models;
 using StealthPane.Services;
+using StealthPane.Updater.Models;
+using StealthPane.Updater.Services;
 
 namespace StealthPane.ViewModels;
 
-public sealed partial class SettingsViewModel(SettingsService settingsService, CliProviderRegistry providerRegistry) : ViewModelBase,
+public sealed partial class SettingsViewModel(
+    SettingsService settingsService,
+    CliProviderRegistry providerRegistry,
+    UpdateService updateService) : ViewModelBase,
     IRecipient<RegionSelectedMessage>,
     IRecipient<WindowSelectedMessage>
 {
+    private GitHubRelease? pendingRelease;
+
     [ObservableProperty]
     public partial IReadOnlyList<string> ProviderNames { get; set; } = [];
 
@@ -51,6 +59,20 @@ public sealed partial class SettingsViewModel(SettingsService settingsService, C
 
     [ObservableProperty]
     public partial string DownloadModelButtonText { get; set; } = "Download Model";
+
+    [ObservableProperty]
+    public partial string? UpdateStatusText { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsUpdateAvailable { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsUpdating { get; set; }
+
+    [ObservableProperty]
+    public partial string UpdateButtonText { get; set; }
+
+    public string VersionText { get; } = $"v{UpdateService.CurrentVersion}";
 
     [ObservableProperty]
     public partial bool IsRegionMode { get; set; }
@@ -194,6 +216,8 @@ public sealed partial class SettingsViewModel(SettingsService settingsService, C
             ? "Model ready"
             : "Download Model";
 
+        UpdateButtonText = IsUpdateAvailable ? "Update & Restart" : "Check for Updates";
+
         WeakReferenceMessenger.Default.Register<RegionSelectedMessage>(this);
         WeakReferenceMessenger.Default.Register<WindowSelectedMessage>(this);
     }
@@ -215,6 +239,75 @@ public sealed partial class SettingsViewModel(SettingsService settingsService, C
     private void ResetAudioPrompt()
     {
         AudioSystemPrompt = new AudioSettings().SystemPrompt;
+    }
+
+    [RelayCommand]
+    private async Task CheckForUpdate()
+    {
+        if (IsUpdating)
+        {
+            return;
+        }
+
+        if (IsUpdateAvailable && pendingRelease is not null)
+        {
+            await ApplyUpdate();
+            return;
+        }
+
+        UpdateButtonText = "Checking...";
+        var release = await updateService.CheckForUpdateAsync();
+
+        if (release is not null)
+        {
+            pendingRelease = release;
+            IsUpdateAvailable = true;
+            var version = release.TagName;
+            UpdateStatusText = $"New version available: {version}";
+            UpdateButtonText = "Update & Restart";
+            WeakReferenceMessenger.Default.Send(new UpdateAvailableMessage(true));
+        }
+        else
+        {
+            UpdateStatusText = "You're on the latest version";
+            UpdateButtonText = "Check for Updates";
+        }
+    }
+
+    private async Task ApplyUpdate()
+    {
+        if (pendingRelease is null)
+        {
+            return;
+        }
+
+        IsUpdating = true;
+        UpdateButtonText = "Downloading...";
+
+        updateService.DownloadProgress += OnUpdateDownloadProgress;
+        var success = await updateService.DownloadAndApplyAsync(pendingRelease);
+        updateService.DownloadProgress -= OnUpdateDownloadProgress;
+
+        if (success)
+        {
+            UpdateButtonText = "Restarting...";
+            UpdateService.LaunchUpdateAndExit();
+        }
+        else
+        {
+            IsUpdating = false;
+            UpdateButtonText = "Update & Restart";
+            UpdateStatusText = "Update failed. Try again.";
+        }
+    }
+
+    private void OnUpdateDownloadProgress(long downloaded, long total)
+    {
+        if (total > 0)
+        {
+            var pct = (int)(downloaded * 100 / total);
+            Dispatcher.UIThread.Post(() => UpdateButtonText = $"Downloading... {pct}%");
+        }
     }
 
     [RelayCommand]

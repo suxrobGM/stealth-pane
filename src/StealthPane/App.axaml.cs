@@ -6,6 +6,7 @@ using StealthPane.Audio;
 using StealthPane.ScreenCapture;
 using StealthPane.Services;
 using StealthPane.Terminal;
+using StealthPane.Updater;
 using StealthPane.ViewModels;
 
 namespace StealthPane;
@@ -43,6 +44,7 @@ public partial class App : Application
         services.AddSingleton<HotkeyService>();
         services.AddSingleton<CaptureInjectorService>();
         services.AddSingleton<AudioInjectorService>();
+        services.AddUpdater();
 
         // ViewModels
         services.AddSingleton<AudioViewModel>();

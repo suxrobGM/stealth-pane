@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthPane.Messages;
 using StealthPane.ScreenCapture.Services;
-using StealthPane.Services;
 using StealthPane.Utilities;
 using StealthPane.ViewModels;
 using StealthPane.Views;

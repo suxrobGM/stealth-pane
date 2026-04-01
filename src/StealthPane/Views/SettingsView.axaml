@@ -137,6 +137,27 @@
         </StackPanel>
       </StackPanel>
 
+      <Border Classes="divider" />
+
+      <!-- Updates -->
+      <StackPanel Spacing="8">
+        <TextBlock Classes="section-header" Text="UPDATES" />
+
+        <TextBlock Classes="field-label" Text="{Binding VersionText}" />
+
+        <TextBlock Classes="field-label" FontSize="11"
+                   Foreground="{StaticResource AccentBrush}"
+                   Text="{Binding UpdateStatusText}"
+                   IsVisible="{Binding UpdateStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <Button FontSize="11" Height="28"
+                Background="{StaticResource ControlBg}" Foreground="{StaticResource SecondaryFg}"
+                BorderThickness="0" HorizontalAlignment="Left"
+                Command="{Binding CheckForUpdateCommand}"
+                IsEnabled="{Binding !IsUpdating}"
+                Content="{Binding UpdateButtonText}" />
+      </StackPanel>
+
     </StackPanel>
   </ScrollViewer>
 </UserControl>

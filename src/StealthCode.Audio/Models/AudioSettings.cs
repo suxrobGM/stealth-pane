@@ -2,7 +2,7 @@ namespace StealthCode.Audio.Models;
 
 public sealed record AudioSettings
 {
-    public string Hotkey { get; set; } = "Shift+A";
+    public string Hotkey { get; set; } = "Ctrl+Shift+A";
     public string ModelPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "StealthCode", "models", "ggml-base.bin");

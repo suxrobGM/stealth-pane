@@ -20,7 +20,7 @@ public sealed partial class AudioViewModel(
     public partial bool IsRecording { get; set; }
 
     [ObservableProperty]
-    public partial string HotkeyText { get; set; } = "\u23FA Shift+A";
+    public partial string HotkeyText { get; set; } = "\u23FA Ctrl+Shift+A";
 
     [ObservableProperty]
     public partial bool IsModelAvailable { get; set; }

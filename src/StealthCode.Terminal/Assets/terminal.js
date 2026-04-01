@@ -60,6 +60,10 @@ function termWrite(base64Data) {
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
+  // Detect clear-screen sequence (ESC[2J) and also clear scrollback
+  if (binary.includes("\x1b[2J")) {
+    term.clear();
+  }
   term.write(bytes);
 }
 

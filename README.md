@@ -54,9 +54,9 @@ This publishes the main app, GZip-compresses all files, embeds them into a light
 | Switch provider | Title bar dropdown |
 | Adjust opacity | Settings > General > Opacity slider |
 | Toggle always-on-top | Pin button in title bar |
-| Capture screenshot | `Shift+C` (configurable in settings) |
-| Record meeting audio | `Shift+A` (press again to stop, transcribe, and send) |
-| Cycle opacity | `Shift+O` (configurable in settings) |
+| Capture screenshot | `Ctrl+Shift+C` (configurable in settings) |
+| Record meeting audio | `Ctrl+Shift+A` (press again to stop, transcribe, and send) |
+| Cycle opacity | `Ctrl+Shift+O` (configurable in settings) |
 
 ## Architecture
 

@@ -21,7 +21,7 @@ public sealed record CaptureSettings
     [JsonIgnore]
     public nint WindowHandle { get; set; }
 
-    public string Hotkey { get; set; } = "Shift+C";
+    public string Hotkey { get; set; } = "Ctrl+Shift+C";
 
     public string SystemPrompt { get; set; } =
         "Analyze the screenshot and answer any visible questions or problems concisely. For interview questions, give direct answers. For coding problems, provide the solution. Do not describe the screenshot itself unless asked.";

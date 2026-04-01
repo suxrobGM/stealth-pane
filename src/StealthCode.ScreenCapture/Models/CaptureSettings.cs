@@ -24,5 +24,5 @@ public sealed record CaptureSettings
     public string Hotkey { get; set; } = "Shift+C";
 
     public string SystemPrompt { get; set; } =
-        "Analyze the following screenshot. Describe what you see and suggest actions or code changes based on the content.";
+        "Analyze the screenshot and answer any visible questions or problems concisely. For interview questions, give direct answers. For coding problems, provide the solution. Do not describe the screenshot itself unless asked.";
 }

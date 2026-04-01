@@ -7,5 +7,5 @@ public sealed record AudioSettings
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "StealthCode", "models", "ggml-base.bin");
     public string SystemPrompt { get; set; } =
-        "Analyze the following meeting transcript and provide insights, action items, and key decisions:";
+        "Listen to the transcribed audio and answer any questions or problems concisely. For interview questions, give direct answers. For coding problems, provide the solution. Do not summarize the transcript unless asked.";
 }

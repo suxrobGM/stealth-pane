@@ -66,10 +66,17 @@ internal readonly partial struct GdiBitmap : IDisposable
     [StructLayout(LayoutKind.Sequential)]
     private struct BITMAPINFOHEADER
     {
-        public uint biSize, biSizeImage, biClrUsed, biClrImportant;
-        public int biWidth, biHeight, biXPelsPerMeter, biYPelsPerMeter;
-        public ushort biPlanes, biBitCount;
+        public uint biSize;
+        public int biWidth;
+        public int biHeight;
+        public ushort biPlanes;
+        public ushort biBitCount;
         public uint biCompression;
+        public uint biSizeImage;
+        public int biXPelsPerMeter;
+        public int biYPelsPerMeter;
+        public uint biClrUsed;
+        public uint biClrImportant;
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -52,6 +52,13 @@ public sealed partial class ScreenCaptureService
             return;
         }
 
+        // If the window is minimized, restore it first so we can capture its content.
+        if (IsIconic(windowHandle))
+        {
+            ShowWindow(windowHandle, SW_RESTORE);
+            Thread.Sleep(200);
+        }
+
         GetWindowRect(windowHandle, out var rect);
         var width = rect.Right - rect.Left;
         var height = rect.Bottom - rect.Top;
@@ -83,6 +90,7 @@ public sealed partial class ScreenCaptureService
     private const int SM_CYSCREEN = 1;
     private const uint SRCCOPY = 0x00CC0020;
     private const uint PW_RENDERFULLCONTENT = 0x00000002;
+    private const int SW_RESTORE = 9;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT { public int Left, Top, Right, Bottom; }
@@ -102,6 +110,14 @@ public sealed partial class ScreenCaptureService
     [LibraryImport("gdi32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool BitBlt(IntPtr dst, int xD, int yD, int w, int h, IntPtr src, int xS, int yS, uint rop);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool IsIconic(nint hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(nint hWnd, int nCmdShow);
 
     #endregion
 }

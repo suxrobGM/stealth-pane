@@ -16,6 +16,20 @@
     <local:ViewLocator />
   </Application.DataTemplates>
 
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="/Assets/logo.ico" ToolTipText="StealthCode">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="Show" Click="OnTrayShow" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="Exit" Click="OnTrayExit" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
+
   <Application.Styles>
     <FluentTheme />
     <StyleInclude Source="/Themes/Styles.axaml" />

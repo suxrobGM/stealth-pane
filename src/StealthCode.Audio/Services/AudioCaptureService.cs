@@ -9,6 +9,9 @@ namespace StealthCode.Audio.Services;
 /// </summary>
 public sealed class AudioCaptureService : IDisposable
 {
+    private static readonly string CapturesDir = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StealthCode", "captures");
+
     private WasapiLoopbackCapture? capture;
     private MemoryStream? capturedPcm;
     private WaveFormat? captureFormat;
@@ -87,9 +90,8 @@ public sealed class AudioCaptureService : IDisposable
         }
 
         // Save as WAV file
-        var capturesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
-        Directory.CreateDirectory(capturesDir);
-        var wavPath = Path.Combine(capturesDir, $"audio_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.wav");
+        Directory.CreateDirectory(CapturesDir);
+        var wavPath = Path.Combine(CapturesDir, $"audio_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.wav");
         WriteWav(wavPath, samples, 16000);
 
         return wavPath;

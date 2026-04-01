@@ -6,7 +6,8 @@ namespace StealthCode.ScreenCapture.Services;
 
 public sealed partial class ScreenCaptureService
 {
-    private static readonly string CapturesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
+    private static readonly string CapturesDir = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StealthCode", "captures");
 
     public string Capture(CaptureSettings settings)
     {

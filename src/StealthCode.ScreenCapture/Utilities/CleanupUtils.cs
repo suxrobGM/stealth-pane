@@ -7,7 +7,8 @@ public static class CleanupUtils
     /// </summary>
     public static void CleanupOldCaptures()
     {
-        var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "captures");
+        var dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StealthCode", "captures");
 
         if (!Directory.Exists(dir))
         {

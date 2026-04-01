@@ -50,6 +50,7 @@ Modules (Terminal, ScreenCapture, Audio) are independent — zero inter-module d
 - Win32 interop uses `[LibraryImport]` with `partial` static classes
 - All colors in `Themes/Theme.axaml`, all styles in `Themes/Styles.axaml`
 - Reusable XAML classes: `Button.chrome`, `Button.chrome.pinned`, `TextBlock.section-header`, `TextBlock.field-label`, `Border.divider`, `*.form-input`
+- Settings, models, and captures stored in `%APPDATA%/StealthCode/` via `System.Text.Json` source gen
 - Code-behind kept minimal — only platform-specific ops
 - Content protection disabled in DEBUG builds
 

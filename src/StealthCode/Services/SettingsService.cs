@@ -12,13 +12,17 @@ internal sealed partial class AppSettingsJsonContext : JsonSerializerContext;
 
 public sealed class SettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
+    private static readonly string AppDataDir = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StealthCode");
+
+    private static readonly string SettingsPath = Path.Combine(AppDataDir, "settings.json");
     private Timer? saveTimer;
 
     public AppSettings Settings { get; } = Load();
 
     public void Save()
     {
+        Directory.CreateDirectory(AppDataDir);
         var json = JsonSerializer.Serialize(Settings, AppSettingsJsonContext.Default.AppSettings);
         var tempPath = SettingsPath + ".tmp";
         File.WriteAllText(tempPath, json);

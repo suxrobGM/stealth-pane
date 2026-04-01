@@ -7,6 +7,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using StealthCode.Messages;
 using StealthCode.ScreenCapture.Services;
+// ReSharper disable once RedundantUsingDirective
+using StealthCode.Services;
 using StealthCode.Utilities;
 using StealthCode.ViewModels;
 using StealthCode.Views;

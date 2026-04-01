@@ -4,6 +4,7 @@
         xmlns:controls="using:StealthCode.Controls"
         x:Class="StealthCode.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/logo.png"
         Title="Stealth Code"
         Width="900" Height="600"
         MinWidth="500" MinHeight="300"
@@ -42,7 +43,7 @@
         <StackPanel Orientation="Horizontal" Spacing="12" Margin="12,0,0,0"
                     VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" />
+            <Image Source="/Assets/logo-16.png" Width="14" Height="14" VerticalAlignment="Center" />
             <TextBlock Text="STEALTH CODE" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource TertiaryFg}" VerticalAlignment="Center" />
           </StackPanel>

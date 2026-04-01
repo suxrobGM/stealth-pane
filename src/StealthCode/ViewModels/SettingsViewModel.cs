@@ -37,16 +37,16 @@ public sealed partial class SettingsViewModel(
     public partial int SelectedCaptureModeIndex { get; set; }
 
     [ObservableProperty]
-    public partial string Hotkey { get; set; } = "Ctrl+Shift+C";
+    public partial string Hotkey { get; set; } = "Shift+C";
 
     [ObservableProperty]
-    public partial string OpacityHotkey { get; set; } = "Ctrl+Shift+O";
+    public partial string OpacityHotkey { get; set; } = "Shift+O";
 
     [ObservableProperty]
     public partial string SystemPrompt { get; set; } = "";
 
     [ObservableProperty]
-    public partial string AudioHotkey { get; set; } = "Ctrl+Shift+A";
+    public partial string AudioHotkey { get; set; } = "Shift+A";
 
     [ObservableProperty]
     public partial string AudioModelPath { get; set; } = "";

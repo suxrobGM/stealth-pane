@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Assets\m9snoi.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <AssemblyName>stealthcode</AssemblyName>
     <Version>1.0.0</Version>
     <Authors>Sukhrob Ilyosbekov</Authors>
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="Assets\m9snoi.ico"/>
+    <AvaloniaResource Include="Assets\logo.ico"/>
   </ItemGroup>
 
   <!-- Embed all application files from the Embedded folder -->

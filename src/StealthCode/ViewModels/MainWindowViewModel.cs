@@ -74,7 +74,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public partial string OpacityText { get; set; } = "\u25D0 100%";
 
     [ObservableProperty]
-    public partial string CaptureHotkeyText { get; set; } = "\u2328 Ctrl+Shift+C";
+    public partial string CaptureHotkeyText { get; set; } = "\u2328 Shift+C";
 
     public string VersionText { get; } = $"v{UpdateService.CurrentVersion}";
 

@@ -28,7 +28,7 @@ Built with .NET 10 and Avalonia UI. Windows only.
 
 ```bash
 # Clone the repository
-git clone https://github.com/anthropics/stealth-code.git
+git clone https://github.com/suxrobgm/stealth-code.git
 cd stealth-code
 
 # Build and run
@@ -54,9 +54,9 @@ This publishes the main app, GZip-compresses all files, embeds them into a light
 | Switch provider | Title bar dropdown |
 | Adjust opacity | Settings > General > Opacity slider |
 | Toggle always-on-top | Pin button in title bar |
-| Capture screenshot | `Ctrl+Shift+C` (configurable in settings) |
-| Record meeting audio | `Ctrl+Shift+A` (press again to stop, transcribe, and send) |
-| Cycle opacity | `Ctrl+Shift+O` (configurable in settings) |
+| Capture screenshot | `Shift+C` (configurable in settings) |
+| Record meeting audio | `Shift+A` (press again to stop, transcribe, and send) |
+| Cycle opacity | `Shift+O` (configurable in settings) |
 
 ## Architecture
 

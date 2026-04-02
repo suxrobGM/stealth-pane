@@ -53,6 +53,28 @@ Stealth Code can capture your screen and inject the screenshot directly into the
 
 For minimized windows, the app restores them briefly via `ShowWindow(SW_RESTORE)` and waits 200ms for the window to render before capturing.
 
+### Multi-Capture Mode
+
+For content that doesn't fit in a single screenshot (e.g., long coding problems that require scrolling), multi-capture mode lets you accumulate multiple screenshots and send them all at once.
+
+**The flow:**
+
+1. Press `Ctrl+Shift+X` to take the first screenshot — the title bar shows a capture counter.
+2. Scroll the content and press `Ctrl+Shift+X` again to capture the next portion. Repeat as needed.
+3. Press `Ctrl+Shift+C` to finalize — all accumulated screenshots are sent to the CLI with a special prompt that instructs the AI to treat them as one continuous document and ignore overlapping regions from scrolling.
+
+Each screenshot is saved as a separate PNG. The multi-capture system prompt is configurable independently from the single-capture prompt.
+
+## No-Focus Mode
+
+Stealth Code can be configured to **not steal focus** from other windows when clicked. This is useful when you need to keep a browser tab or other application active while glancing at AI responses.
+
+**How it works:**
+
+Toggling no-focus mode (`Ctrl+Shift+F`) adds the [`WS_EX_NOACTIVATE`](https://learn.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles) extended window style to the window via `SetWindowLongPtr`. This tells Windows not to activate the window on mouse clicks — the previously focused application retains keyboard focus.
+
+When active, a "NO-FOCUS" indicator appears in the title bar. All global hotkeys (capture, audio, opacity) continue to work since they use `RegisterHotKey` and don't require window focus. Press the hotkey again to re-enable normal focus for typing in the terminal.
+
 ## Audio Capture & Transcription
 
 Stealth Code records system audio (what you hear through your speakers/headphones) and transcribes it using a local Whisper model — no cloud services involved.

@@ -2,6 +2,13 @@
 
 All notable changes to Stealth Code will be documented in this file.
 
+## [1.1.0] - 2026-04-02
+
+### Features
+
+- **Multi-capture mode** — Accumulate multiple screenshots (e.g., scrollable content) with `Ctrl+Shift+X`, then send all at once with `Ctrl+Shift+C`. Uses a dedicated prompt that handles overlapping regions from scrolling.
+- **No-focus mode** — Toggle with `Ctrl+Shift+F` to prevent the window from stealing focus when clicked, keeping your browser or other app active. Indicator shown in the title bar.
+
 ## [1.0.5] - 2026-04-01
 
 ### Improvements

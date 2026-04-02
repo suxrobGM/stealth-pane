@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace StealthCode.Services;
 
@@ -20,7 +21,7 @@ public sealed partial class HotkeyService : IDisposable
 
     public bool Register(string name, string hotkeyString, IntPtr windowHandle, Action callback)
     {
-        if (!OperatingSystem.IsWindows())
+        if (windowHandle == IntPtr.Zero)
         {
             return false;
         }

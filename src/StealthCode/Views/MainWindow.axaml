@@ -61,6 +61,13 @@
             <TextBlock Text="PROTECTED" FontSize="10" Foreground="{StaticResource AccentBrush}"
                        Opacity="0.6" VerticalAlignment="Center" />
           </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
+                      IsVisible="{Binding IsNoFocus}">
+            <Ellipse Width="5" Height="5" Fill="{StaticResource WarningFg}" Opacity="0.6" />
+            <TextBlock Text="NO-FOCUS" FontSize="10" Foreground="{StaticResource WarningFg}"
+                       Opacity="0.6" VerticalAlignment="Center" />
+          </StackPanel>
         </StackPanel>
 
       </DockPanel>
@@ -80,6 +87,12 @@
         <TextBlock DockPanel.Dock="Left" FontSize="10" Foreground="{StaticResource MutedFg}"
                    VerticalAlignment="Center"
                    Text="{Binding CaptureHotkeyText}" />
+        <!-- Multi-capture indicator -->
+        <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource AccentBrush}"
+                   Text="{Binding MultiCaptureText}"
+                   IsVisible="{Binding IsMultiCaptureActive}" />
         <!-- Audio: show hotkey when model ready, REC when recording, download status otherwise -->
         <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
                    VerticalAlignment="Center"

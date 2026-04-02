@@ -46,6 +46,13 @@
           <TextBlock Classes="field-label" Text="Opacity Hotkey" />
           <controls:HotkeyTextBox Hotkey="{Binding OpacityHotkey, Mode=TwoWay}" />
         </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="No-Focus Mode" />
+          <controls:HotkeyTextBox Hotkey="{Binding NoFocusHotkey, Mode=TwoWay}" />
+          <TextBlock FontSize="10" Foreground="{StaticResource MutedFg}" TextWrapping="Wrap"
+                     Text="Prevents this window from stealing focus when clicked, keeping your browser active" />
+        </StackPanel>
       </StackPanel>
 
       <Border Classes="divider" />
@@ -85,8 +92,17 @@
         </StackPanel>
 
         <StackPanel Spacing="4">
-          <TextBlock Classes="field-label" Text="Hotkey" />
+          <TextBlock Classes="field-label" Text="Single Capture" />
           <controls:HotkeyTextBox Hotkey="{Binding Hotkey, Mode=TwoWay}" />
+          <TextBlock FontSize="10" Foreground="{StaticResource MutedFg}" TextWrapping="Wrap"
+                     Text="Takes one screenshot and sends it immediately" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="field-label" Text="Multi-Capture" />
+          <controls:HotkeyTextBox Hotkey="{Binding MultiCaptureHotkey, Mode=TwoWay}" />
+          <TextBlock FontSize="10" Foreground="{StaticResource MutedFg}" TextWrapping="Wrap"
+                     Text="Press to accumulate screenshots (e.g. after scrolling), then press Single Capture to send all at once" />
         </StackPanel>
 
         <StackPanel Spacing="4">

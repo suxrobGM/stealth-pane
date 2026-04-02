@@ -9,6 +9,7 @@ using StealthCode.ScreenCapture.Utilities;
 using StealthCode.Services;
 using StealthCode.Terminal;
 using StealthCode.Updater.Services;
+using StealthCode.Utilities;
 
 namespace StealthCode.ViewModels;
 
@@ -79,6 +80,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     [ObservableProperty]
     public partial string CaptureHotkeyText { get; set; } = "\u2328 Ctrl+Shift+C";
 
+    [ObservableProperty]
+    public partial string MultiCaptureText { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool IsMultiCaptureActive { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsNoFocus { get; set; }
+
+    [ObservableProperty]
+    public partial string NoFocusText { get; set; } = "";
+
     public string VersionText { get; } = $"v{UpdateService.CurrentVersion}";
 
     [ObservableProperty]
@@ -95,17 +108,19 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
         if (message.Name == "capture")
         {
             CaptureHotkeyText = $"\u2328 {message.Hotkey}";
-            if (hwnd != IntPtr.Zero)
-            {
-                hotkeyService.Register("capture", message.Hotkey, hwnd, CaptureScreen);
-            }
+            hotkeyService.Register("capture", message.Hotkey, hwnd, CaptureScreen);
+        }
+        else if (message.Name == "multicapture")
+        {
+            hotkeyService.Register("multicapture", message.Hotkey, hwnd, MultiCapture);
         }
         else if (message.Name == "opacity")
         {
-            if (hwnd != IntPtr.Zero)
-            {
-                hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
-            }
+            hotkeyService.Register("opacity", message.Hotkey, hwnd, CycleOpacity);
+        }
+        else if (message.Name == "nofocus")
+        {
+            hotkeyService.Register("nofocus", message.Hotkey, hwnd, ToggleNoFocus);
         }
         else if (message.Name == "audio")
         {
@@ -135,6 +150,24 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
     public void CaptureScreen()
     {
         captureInjectorService.CaptureAndInject();
+        // Update UI — multi-capture may have just been finalized
+        IsMultiCaptureActive = captureInjectorService.IsMultiCaptureActive;
+        MultiCaptureText = IsMultiCaptureActive ? $"\u25A3 {captureInjectorService.PendingCount} captured" : "";
+    }
+
+    public void MultiCapture()
+    {
+        captureInjectorService.MultiCapture();
+        var count = captureInjectorService.PendingCount;
+        IsMultiCaptureActive = true;
+        MultiCaptureText = $"\u25A3 {count} captured";
+    }
+
+    public void ToggleNoFocus()
+    {
+        IsNoFocus = !IsNoFocus;
+        WeakReferenceMessenger.Default.Send(new NoFocusChangedMessage(IsNoFocus));
+        NoFocusText = IsNoFocus ? "\u229A NO-FOCUS" : "";
     }
 
     public void Initialize(IntPtr windowHandle)
@@ -290,7 +323,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase,
 
         var settings = settingsService.Settings;
         hotkeyService.Register("capture", settings.Capture.Hotkey, hwnd, CaptureScreen);
+        hotkeyService.Register("multicapture", settings.Capture.MultiCaptureHotkey, hwnd, MultiCapture);
         hotkeyService.Register("opacity", settings.OpacityHotkey, hwnd, CycleOpacity);
+        hotkeyService.Register("nofocus", settings.NoFocusHotkey, hwnd, ToggleNoFocus);
     }
 
     private void LoadFromSettings()

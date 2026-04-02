@@ -19,6 +19,7 @@ public sealed partial class MainWindow : Window,
     IRecipient<SwitchTerminalMessage>,
     IRecipient<FallbackToShellMessage>,
     IRecipient<ApplyOpacityMessage>,
+    IRecipient<NoFocusChangedMessage>,
     IRecipient<RequestRegionSelectionMessage>,
     IRecipient<RequestWindowSelectionMessage>
 {
@@ -38,6 +39,11 @@ public sealed partial class MainWindow : Window,
     public void Receive(ApplyOpacityMessage message)
     {
         WindowOpacityUtils.Apply(this, message.Opacity);
+    }
+
+    public void Receive(NoFocusChangedMessage message)
+    {
+        WindowNoFocusUtils.Apply(this, message.IsNoFocus);
     }
 
     public void Receive(FallbackToShellMessage message)
@@ -86,6 +92,7 @@ public sealed partial class MainWindow : Window,
         WeakReferenceMessenger.Default.Register<SwitchTerminalMessage>(this);
         WeakReferenceMessenger.Default.Register<FallbackToShellMessage>(this);
         WeakReferenceMessenger.Default.Register<ApplyOpacityMessage>(this);
+        WeakReferenceMessenger.Default.Register<NoFocusChangedMessage>(this);
         WeakReferenceMessenger.Default.Register<RequestRegionSelectionMessage>(this);
         WeakReferenceMessenger.Default.Register<RequestWindowSelectionMessage>(this);
 

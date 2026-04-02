@@ -40,7 +40,13 @@ public sealed partial class SettingsViewModel(
     public partial string Hotkey { get; set; } = "Ctrl+Shift+C";
 
     [ObservableProperty]
+    public partial string MultiCaptureHotkey { get; set; } = "Ctrl+Shift+M";
+
+    [ObservableProperty]
     public partial string OpacityHotkey { get; set; } = "Ctrl+Shift+O";
+
+    [ObservableProperty]
+    public partial string NoFocusHotkey { get; set; } = "Ctrl+Shift+F";
 
     [ObservableProperty]
     public partial string SystemPrompt { get; set; } = "";
@@ -133,10 +139,24 @@ public sealed partial class SettingsViewModel(
         settingsService.SaveDebounced();
     }
 
+    partial void OnMultiCaptureHotkeyChanged(string value)
+    {
+        settingsService.Settings.Capture.MultiCaptureHotkey = value;
+        WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("multicapture", value));
+        settingsService.SaveDebounced();
+    }
+
     partial void OnOpacityHotkeyChanged(string value)
     {
         settingsService.Settings.OpacityHotkey = value;
         WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("opacity", value));
+        settingsService.SaveDebounced();
+    }
+
+    partial void OnNoFocusHotkeyChanged(string value)
+    {
+        settingsService.Settings.NoFocusHotkey = value;
+        WeakReferenceMessenger.Default.Send(new HotkeyChangedMessage("nofocus", value));
         settingsService.SaveDebounced();
     }
 
@@ -195,8 +215,11 @@ public sealed partial class SettingsViewModel(
         IsWindowMode = settings.Capture.Mode == CaptureMode.Window;
 
         Hotkey = settings.Capture.Hotkey;
+        MultiCaptureHotkey = settings.Capture.MultiCaptureHotkey;
         OpacityHotkey = settings.OpacityHotkey;
+        NoFocusHotkey = settings.NoFocusHotkey;
         SystemPrompt = settings.Capture.SystemPrompt;
+
         if (settings.Capture is { RegionWidth: > 0, RegionHeight: > 0 })
         {
             RegionDisplayText =

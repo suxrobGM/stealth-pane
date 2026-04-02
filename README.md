@@ -42,6 +42,8 @@ Need to use AI coding tools during a screen share, interview prep, or recording 
 - **Always-on-top overlay** - Pin the terminal above other windows with adjustable opacity
 - **Multiple AI CLIs** - Switch between Claude Code, Codex, and Gemini CLI from the title bar
 - **Screenshot capture** - Capture your screen and inject it into the active CLI for instant AI analysis
+- **Multi-capture mode** - Accumulate multiple screenshots (e.g., scrollable content) and send them all at once with overlap-aware prompting
+- **No-focus mode** - Keep your browser focused while interacting with Stealth Code — clicks won't steal focus
 - **Meeting audio capture** - Record system audio, transcribe locally with Whisper, and send to the CLI
 - **Custom system prompts** - Set separate prompts for screenshot and audio captures to tailor AI responses (e.g., "solve in Python", "give direct answers")
 - **Configurable hotkeys** - Global hotkeys for all actions, customizable in settings
@@ -90,8 +92,10 @@ Need to use AI coding tools during a screen share, interview prep, or recording 
 | Action | Default Shortcut |
 | --- | --- |
 | Capture screenshot | `Ctrl+Shift+C` |
+| Multi-capture (accumulate screenshots) | `Ctrl+Shift+X` |
 | Record/stop audio | `Ctrl+Shift+A` |
 | Cycle opacity | `Ctrl+Shift+O` |
+| Toggle no-focus mode | `Ctrl+Shift+F` |
 
 All hotkeys are customizable in the settings panel.
 

@@ -23,6 +23,11 @@ public sealed record CaptureSettings
 
     public string Hotkey { get; set; } = "Ctrl+Shift+C";
 
+    public string MultiCaptureHotkey { get; set; } = "Ctrl+Shift+X";
+
     public string SystemPrompt { get; set; } =
         "Analyze the screenshot and answer any visible questions or problems concisely. For interview questions, give direct answers. For coding problems, provide the solution. Do not describe the screenshot itself unless asked.";
+
+    public string MultiCaptureSystemPrompt { get; set; } =
+        "The following screenshots show consecutive parts of the same scrollable page. They may contain overlapping regions from scrolling. Treat them as one continuous document, ignore duplicate content, and answer any visible questions or problems concisely";
 }

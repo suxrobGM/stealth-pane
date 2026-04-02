@@ -21,6 +21,12 @@ public sealed record RequestWindowSelectionMessage;
 // MainWindowViewModel -> View: recording state changed
 public sealed record AudioRecordingChangedMessage(bool IsRecording);
 
+// MainWindowViewModel -> View: no-focus mode changed
+public sealed record NoFocusChangedMessage(bool IsNoFocus);
+
+// CaptureInjectorService -> MainWindowViewModel: multi-capture state changed
+public sealed record MultiCaptureChangedMessage(bool IsActive, int Count);
+
 // SettingsViewModel -> MainWindowViewModel: request model download
 public sealed record ModelDownloadRequestedMessage(string ModelPath);
 

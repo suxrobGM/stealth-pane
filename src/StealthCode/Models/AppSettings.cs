@@ -10,6 +10,7 @@ public sealed record class AppSettings
     public bool AlwaysOnTop { get; set; }
     public CaptureSettings Capture { get; set; } = new();
     public string OpacityHotkey { get; set; } = "Ctrl+Shift+O";
+    public string NoFocusHotkey { get; set; } = "Ctrl+Shift+F";
     public AudioSettings Audio { get; set; } = new();
     public List<CliProviderConfig> CustomProviders { get; set; } = [];
 }

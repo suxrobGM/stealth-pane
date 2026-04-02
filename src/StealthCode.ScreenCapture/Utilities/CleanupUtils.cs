@@ -21,6 +21,11 @@ public static class CleanupUtils
             {
                 File.Delete(file);
             }
+
+            foreach (var file in Directory.GetFiles(dir, "audio_*.*"))
+            {
+                File.Delete(file);
+            }
         }
         catch
         {

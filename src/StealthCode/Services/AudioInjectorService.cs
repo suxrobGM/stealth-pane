@@ -54,7 +54,10 @@ public sealed class AudioInjectorService(
                 return;
             }
 
-            var prompt = $"{audio.SystemPrompt.Trim()} \"{transcript}\"";
+            var transcriptPath = Path.ChangeExtension(wavPath, ".txt");
+            await File.WriteAllTextAsync(transcriptPath, transcript);
+
+            var prompt = $"{audio.SystemPrompt.Trim()} See the transcription file: {transcriptPath.Replace('\\', '/')}";
             pty.Write(Encoding.UTF8.GetBytes(prompt));
             await Task.Delay(500);
             pty.Write(Enter);

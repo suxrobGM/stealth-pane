@@ -2,6 +2,12 @@
 
 All notable changes to Stealth Code will be documented in this file.
 
+## [1.0.3] - 2026-04-01
+
+### Improvements
+
+- Audio transcripts are now saved to a `.txt` file and passed by file path to the CLI, instead of inlining the full transcript text into the terminal
+
 ## [1.0.2] - 2026-04-01
 
 ### Fixes

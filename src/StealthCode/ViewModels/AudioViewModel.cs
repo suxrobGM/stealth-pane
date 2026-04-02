@@ -80,6 +80,7 @@ public sealed partial class AudioViewModel(
             RegisterHotkey();
         }
 
+        audioInjectorService.AudioStateChanged += OnAudioStateChanged;
         WeakReferenceMessenger.Default.Register(this);
     }
 
@@ -101,12 +102,7 @@ public sealed partial class AudioViewModel(
         }
 
         var wasRecording = IsRecording;
-        var started = audioInjectorService.Toggle(isRec =>
-        {
-            IsRecording = isRec;
-            StatusText = "";
-            WeakReferenceMessenger.Default.Send(new AudioRecordingChangedMessage(isRec));
-        });
+        var started = audioInjectorService.Toggle();
 
         if (!started && !wasRecording)
         {
@@ -116,7 +112,15 @@ public sealed partial class AudioViewModel(
 
     public void Cleanup()
     {
+        audioInjectorService.AudioStateChanged -= OnAudioStateChanged;
         WeakReferenceMessenger.Default.Unregister<ModelDownloadRequestedMessage>(this);
+    }
+
+    private void OnAudioStateChanged(AudioStateChangedEventArgs e)
+    {
+        IsRecording = e.IsRecording;
+        StatusText = e.Status;
+        WeakReferenceMessenger.Default.Send(new AudioRecordingChangedMessage(e.IsRecording));
     }
 
     public void LoadFromSettings()

@@ -66,8 +66,8 @@
       </DockPanel>
     </Border>
 
-    <!-- Terminal -->
-    <controls:TerminalWebView Grid.Row="1" Grid.Column="0" x:Name="Terminal" />
+    <!-- Terminal (padding keeps native HWND away from window resize borders) -->
+    <controls:TerminalWebView Grid.Row="1" Grid.Column="0" x:Name="Terminal" Margin="4,0,4,0" />
 
     <!-- Settings Panel -->
     <ContentControl Grid.Row="1" Grid.Column="1"
@@ -86,11 +86,25 @@
                    Foreground="{StaticResource MutedFg}"
                    Text="{Binding Audio.HotkeyText}"
                    IsVisible="{Binding Audio.IsModelAvailable}" />
-        <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
-                   VerticalAlignment="Center"
-                   Foreground="{StaticResource AccentBrush}"
-                   Text="&#x23FA; REC"
-                   IsVisible="{Binding Audio.IsRecording}" />
+        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="4"
+                    Margin="12,0,0,0" VerticalAlignment="Center"
+                    IsVisible="{Binding Audio.IsRecording}">
+          <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" VerticalAlignment="Center">
+            <Ellipse.Styles>
+              <Style Selector="Ellipse">
+                <Style.Animations>
+                  <Animation Duration="0:0:1" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1.0" /></KeyFrame>
+                    <KeyFrame Cue="50%"><Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                    <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1.0" /></KeyFrame>
+                  </Animation>
+                </Style.Animations>
+              </Style>
+            </Ellipse.Styles>
+          </Ellipse>
+          <TextBlock FontSize="10" Foreground="{StaticResource AccentBrush}" Text="REC"
+                     VerticalAlignment="Center" />
+        </StackPanel>
         <TextBlock DockPanel.Dock="Left" FontSize="10" Margin="12,0,0,0"
                    VerticalAlignment="Center"
                    Foreground="{StaticResource WarningFg}"

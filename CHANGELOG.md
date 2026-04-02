@@ -2,6 +2,19 @@
 
 All notable changes to Stealth Code will be documented in this file.
 
+## [1.0.4] - 2026-04-01
+
+### Improvements
+
+- Terminal keyboard shortcuts: Ctrl+C copies selection (falls back to SIGINT), Ctrl+V pastes from clipboard, Ctrl+A selects all, Shift+Enter inserts a literal newline
+- Audio recording status now shows real-time progress updates (saving, transcribing) in the status bar
+- Recording indicator replaced with animated pulsing dot + "REC" label
+- Terminal panel now has horizontal padding to prevent overlap with window resize borders
+
+### Refactors
+
+- Audio state management moved from callback pattern to event-based `AudioStateChanged` on `AudioInjectorService`
+
 ## [1.0.3] - 2026-04-01
 
 ### Improvements

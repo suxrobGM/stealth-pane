@@ -4,6 +4,8 @@ using StealthCode.Terminal;
 
 namespace StealthCode.Services;
 
+public sealed record AudioStateChangedEventArgs(bool IsRecording, string Status);
+
 /// <summary>
 ///     Orchestrates audio capture, transcription, and injection into the terminal.
 ///     Toggle pattern: the first call starts recording, the second call stops → transcribes → injects.
@@ -19,16 +21,21 @@ public sealed class AudioInjectorService(
     public string? LastError => audioCaptureService.LastError;
 
     /// <summary>
+    ///    Raised when audio recording state changes such as start, stop, or status updates (e.g. "Transcribing audio...").
+    /// </summary>
+    public event Action<AudioStateChangedEventArgs>? AudioStateChanged;
+
+    /// <summary>
     ///     Toggles audio recording. Returns true if recording started, false if stopped.
     ///     On stop, transcription and injection happen on a background thread.
     /// </summary>
-    public bool Toggle(Action<bool>? onRecordingChanged = null)
+    public bool Toggle()
     {
         if (!audioCaptureService.IsRecording)
         {
             if (audioCaptureService.StartCapture())
             {
-                onRecordingChanged?.Invoke(true);
+                AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(true, ""));
                 return true;
             }
 
@@ -36,11 +43,12 @@ public sealed class AudioInjectorService(
         }
 
         // Stop recording and process on background thread
+        AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(false, "Saving audio..."));
         var wavPath = audioCaptureService.StopCapture();
-        onRecordingChanged?.Invoke(false);
 
         if (wavPath is null)
         {
+            AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(false, ""));
             return false;
         }
 
@@ -48,9 +56,11 @@ public sealed class AudioInjectorService(
 
         Task.Run(async () =>
         {
+            AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(false, "Transcribing audio..."));
             var transcript = await transcriptionService.TranscribeAsync(wavPath, audio.ModelPath);
             if (string.IsNullOrWhiteSpace(transcript))
             {
+                AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(false, ""));
                 return;
             }
 
@@ -61,6 +71,7 @@ public sealed class AudioInjectorService(
             pty.Write(Encoding.UTF8.GetBytes(prompt));
             await Task.Delay(500);
             pty.Write(Enter);
+            AudioStateChanged?.Invoke(new AudioStateChangedEventArgs(false, ""));
         });
 
         return false;

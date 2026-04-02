@@ -31,23 +31,78 @@ const term = new Terminal({
   allowProposedApi: true,
 });
 
+// Load the FitAddon to enable dynamic resizing of the terminal
 const fitAddon = new FitAddon.FitAddon();
 term.loadAddon(fitAddon);
 term.open(document.getElementById("terminal"));
 fitAddon.fit();
 
-term.onData((data) => {
-  sendMessage({ type: "input", data: data });
-});
-
-term.onResize((size) => {
-  sendMessage({ type: "resize", cols: size.cols, rows: size.rows });
-});
-
 const resizeObserver = new ResizeObserver(() => {
   fitAddon.fit();
 });
 resizeObserver.observe(document.getElementById("terminal"));
+
+/**
+ * Handles custom key events for the terminal.
+ * Intercepts Shift+Enter, Ctrl+C (copy), and Ctrl+V (secure paste).
+ * @param {KeyboardEvent} e
+ * @returns {boolean} - false to prevent xterm default handling
+ */
+function onCustomKeyEvent(e) {
+  if (e.type !== "keydown") return true;
+
+  // Shift+Enter: newline via bracketed paste so the PTY treats it as literal text
+  if (e.key === "Enter" && e.shiftKey) {
+    sendMessage({ type: "input", data: "\x1b[200~\n\x1b[201~" });
+    return false;
+  }
+
+  // Ctrl+C: copy selection if any, otherwise send SIGINT
+  if (e.key === "c" && e.ctrlKey && !e.shiftKey && !e.altKey) {
+    const selection = term.getSelection();
+    if (selection) {
+      navigator.clipboard.writeText(selection);
+      term.clearSelection();
+      return false;
+    }
+    return true;
+  }
+
+  // Ctrl+A: select all terminal content
+  if (e.key === "a" && e.ctrlKey && !e.shiftKey && !e.altKey) {
+    term.selectAll();
+    return false;
+  }
+
+  // Ctrl+V: secure paste: read clipboard, write to PTY, then scrub
+  if (e.key === "v" && e.ctrlKey && !e.shiftKey && !e.altKey) {
+    navigator.clipboard.readText().then((text) => {
+      if (text) {
+        sendMessage({ type: "input", data: text });
+        navigator.clipboard.writeText("");
+      }
+    });
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Forwards terminal input data to the PTY via C# bridge.
+ * @param {string} data - The input data from xterm.js
+ */
+function onTermData(data) {
+  sendMessage({ type: "input", data: data });
+}
+
+/**
+ * Notifies the C# side when the terminal dimensions change.
+ * @param {{ cols: number, rows: number }} size
+ */
+function onTermResize(size) {
+  sendMessage({ type: "resize", cols: size.cols, rows: size.rows });
+}
 
 /**
  * Writes base64-encoded data to the terminal.
@@ -95,5 +150,9 @@ function sendMessage(msg) {
     invokeCSharpAction(JSON.stringify(msg));
   }
 }
+
+term.attachCustomKeyEventHandler(onCustomKeyEvent);
+term.onData(onTermData);
+term.onResize(onTermResize);
 
 sendMessage({ type: "ready", cols: term.cols, rows: term.rows });

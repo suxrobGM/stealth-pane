@@ -2,6 +2,14 @@
 
 All notable changes to Stealth Code will be documented in this file.
 
+## [1.0.5] - 2026-04-01
+
+### Improvements
+
+- Replaced NAudio dependency with native WASAPI loopback capture using COM interop (`LibraryImport`, `GeneratedComInterface`)
+- Extracted audio conversion logic into dedicated `AudioConverter` static class
+- Audio capture service simplified to orchestrate the new `WasapiLoopbackCapture` component
+
 ## [1.0.4] - 2026-04-01
 
 ### Improvements
